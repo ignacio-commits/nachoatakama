@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora de Producción 2026</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f1117; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+    input[type=number]::-webkit-inner-spin-button { opacity: 0.4; }
+    select option { background: #1e2130; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2d3350; border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+const SKUS = {
+  "FUTALEUFÚ ADULT": {
+    "AZUL MARINO":    {"36-37":"PFUTAZMN_3637","38-39":"PFUTAZMN_3839","40-41":"PFUTAZMN_4041","42-43":"PFUTAZMN_4243","44-45":"PFUTAZMN_4445"},
+    "BEIGE ANIMAL PR":{"34-35":"PFUTBEFPN_3435","36-37":"PFUTBEFPN_3637","38-39":"PFUTBEFPN_3839","40-41":"PFUTBEFPN_4041"},
+    "BURDEO":         {"36-37":"PFUTBURN_3637","38-39":"PFUTBURN_3839","40-41":"PFUTBURN_4041","42-43":"PFUTBURN_4243","44-45":"PFUTBURN_4445"},
+    "CAFÉ":           {"36-37":"PFUTCAFN_3637","38-39":"PFUTCAFN_3839","40-41":"PFUTCAFN_4041","42-43":"PFUTCAFN_4243","44-45":"PFUTCAFN_4445"},
+    "PRINT MUJER 2":  {"34-35":"PFUTCAFPN_3435","36-37":"PFUTCAFPN_3637","38-39":"PFUTCAFPN_3839","40-41":"PFUTCAFPN_4041"},
+    "CELESTE PETRÓL": {"36-37":"PFUTCELN_3637","38-39":"PFUTCELN_3839","40-41":"PFUTCELN_4041","42-43":"PFUTCELN_4243","44-45":"PFUTCELN_4445"},
+    "NEGRO CAFÉ":     {"36-37":"PFUTNGRCN_3637","38-39":"PFUTNGRCN_3839","40-41":"PFUTNGRCN_4041","42-43":"PFUTNGRCN_4243","44-45":"PFUTNGRCN_4445"},
+    "NEGRO GRIS":     {"36-37":"PFUTNGRN_3637","38-39":"PFUTNGRN_3839","40-41":"PFUTNGRN_4041","42-43":"PFUTNGRN_4243","44-45":"PFUTNGRN_4445","46-47":"PFUTNGRN_4647"},
+    "VERDE":          {"36-37":"PFUTVRMN_3637","38-39":"PFUTVRMN_3839","40-41":"PFUTVRMN_4041","42-43":"PFUTVRMN_4243","44-45":"PFUTVRMN_4445"},
+  },
+  "NAVARINO": {
+    "AZUL MARINO":    {"36-37":"PNAVAZMN_3637","38-39":"PNAVAZMN_3839","40-41":"PNAVAZMN_4041","42-43":"PNAVAZMN_4243","44-45":"PNAVAZMN_4445"},
+    "IGE ANIMAL PR":  {"34-35":"PNAVBEFPN_3435","36-37":"PNAVBEFPN_3637","38-39":"PNAVBEFPN_3839","40-41":"PNAVBEFPN_4041"},
+    "BURDEO":         {"36-37":"PNAVBURN_3637","38-39":"PNAVBURN_3839","40-41":"PNAVBURN_4041","42-43":"PNAVBURN_4243","44-45":"PNAVBURN_4445"},
+    "CAFÉ":           {"36-37":"PNAVCAFN_3637","38-39":"PNAVCAFN_3839","40-41":"PNAVCAFN_4041","42-43":"PNAVCAFN_4243","44-45":"PNAVCAFN_4445"},
+    "NEGRO GRIS":     {"36-37":"PNAVNGRN_3637","38-39":"PNAVNGRN_3839","40-41":"PNAVNGRN_4041","42-43":"PNAVNGRN_4243","44-45":"PNAVNGRN_4445"},
+    "VERDE":          {"36-37":"PNAVVRMN_3637","38-39":"PNAVVRMN_3839","40-41":"PNAVVRMN_4041","42-43":"PNAVVRMN_4243","44-45":"PNAVVRMN_4445"},
+  },
+  "TORTEL": {
+    "NEGRO GRIS":     {"36-37":"PTORNGR_3637","38-39":"PTORNGR_3839","40-41":"PTORNGR_4041","42-43":"PTORNGR_4243","44-45":"PTORNGR_4445"},
+  },
+};
+
+const MODELOS_DATA = {
+  "FUTALEUFÚ ADULT": { colores: [
+    { name:"NEGRO GRIS", pct:32, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.20},{talla:"40-41",curva:0.30},{talla:"42-43",curva:0.20},{talla:"44-45",curva:0.12},{talla:"46-47",curva:0.08}]},
+    { name:"AZUL MARINO", pct:14, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.40},{talla:"44-45",curva:0.20}]},
+    { name:"BEIGE ANIMAL PR", pct:10, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.40},{talla:"40-41",curva:0.10}]},
+    { name:"VERDE", pct:10, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.16},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.33},{talla:"44-45",curva:0.21}]},
+    { name:"CAFÉ", pct:9, tallas:[{talla:"36-37",curva:0.03},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.36},{talla:"44-45",curva:0.21}]},
+    { name:"CELESTE PETRÓL", pct:9, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.23},{talla:"40-41",curva:0.18},{talla:"42-43",curva:0.23},{talla:"44-45",curva:0.16}]},
+    { name:"BURDEO", pct:7, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.20},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.33},{talla:"44-45",curva:0.18}]},
+    { name:"PRINT MUJER 2", pct:5, tallas:[{talla:"34-35",curva:0.08},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.40},{talla:"40-41",curva:0.12}]},
+    { name:"NEGRO CAFÉ", pct:4, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
+  ]},
+  "NAVARINO": { colores: [
+    { name:"NEGRO GRIS", pct:41, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.17},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.32},{talla:"44-45",curva:0.15},{talla:"46-47",curva:0.05}]},
+    { name:"AZUL MARINO", pct:15, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.17},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.36},{talla:"44-45",curva:0.16}]},
+    { name:"IGE ANIMAL PR", pct:17, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
+    { name:"VERDE", pct:10, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.24},{talla:"44-45",curva:0.18}]},
+    { name:"CAFÉ", pct:7, tallas:[{talla:"36-37",curva:0.22},{talla:"38-39",curva:0.26},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.21},{talla:"44-45",curva:0.11}]},
+    { name:"CELESTE PETRÓLEO", pct:0, tallas:[{talla:"36-37",curva:0.21},{talla:"38-39",curva:0.23},{talla:"40-41",curva:0.23},{talla:"42-43",curva:0.23},{talla:"44-45",curva:0.10}]},
+    { name:"BURDEO", pct:7, tallas:[{talla:"36-37",curva:0.22},{talla:"38-39",curva:0.26},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.21},{talla:"44-45",curva:0.11}]},
+    { name:"PRINT MUJER 2", pct:0, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
+    { name:"NEGRO CAFÉ", pct:0, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
+  ]},
+  "TORTEL": { colores: [
+    { name:"NEGRO GRIS", pct:100, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.17},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.32},{talla:"44-45",curva:0.16},{talla:"46-47",curva:0.04}]},
+    { name:"AZUL MARINO", pct:0, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
+    { name:"ANIMAL PRINT", pct:0, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
+    { name:"VERDE", pct:0, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.28},{talla:"44-45",curva:0.14}]},
+    { name:"CAFÉ", pct:0, tallas:[{talla:"36-37",curva:0.22},{talla:"38-39",curva:0.26},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.21},{talla:"44-45",curva:0.11}]},
+    { name:"CELESTE PETRÓLEO", pct:0, tallas:[{talla:"36-37",curva:0.21},{talla:"38-39",curva:0.23},{talla:"40-41",curva:0.18},{talla:"42-43",curva:0.23},{talla:"44-45",curva:0.15}]},
+    { name:"BURDEO", pct:0, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.19},{talla:"44-45",curva:0.19}]},
+    { name:"PRINT MUJER 2", pct:0, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
+    { name:"NEGRO CAFÉ", pct:0, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
+  ]},
+};
+
+const MODEL_NAMES = Object.keys(MODELOS_DATA);
+const COLOR_MAP = {
+  "NEGRO GRIS":"#6b7280","AZUL MARINO":"#1e3a5f","BEIGE ANIMAL PR":"#c8a97e",
+  "IGE ANIMAL PR":"#c8a97e","ANIMAL PRINT":"#c8a97e","VERDE":"#4a7c59",
+  "CAFÉ":"#6f4e37","CELESTE PETRÓL":"#2e7d8a","CELESTE PETRÓLEO":"#2e7d8a",
+  "BURDEO":"#7b2d3e","PRINT MUJER 2":"#c084fc","NEGRO CAFÉ":"#3d2b1f",
+};
+const getAccent = n => COLOR_MAP[n] || "#6C9BF5";
+const MODEL_COLORS = ["#6C9BF5","#4FC3F7","#A5D6A7","#FFCC80"];
+
+function getSku(modelo, color, talla) {
+  return SKUS[modelo]?.[color]?.[talla] || "";
+}
+
+function calcDistribucion(modelName, total, colorPcts) {
+  return MODELOS_DATA[modelName].colores.map(c => {
+    const p = (Number(colorPcts[c.name]) || 0) / 100;
+    const totalColor = Math.round(total * p);
+    const filas = c.tallas.map(t => ({
+      talla: t.talla, curva: t.curva,
+      qty: Math.round(totalColor * t.curva),
+      sku: getSku(modelName, c.name, t.talla)
+    }));
+    const suma = filas.reduce((a,b)=>a+b.qty,0);
+    if (filas.length > 0) filas[filas.length-1].qty += totalColor - suma;
+    return { ...c, totalColor, filas, accent: getAccent(c.name) };
+  }).filter(c => c.totalColor > 0);
+}
+
+function initColorPcts(modelName) {
+  const pcts = {};
+  MODELOS_DATA[modelName].colores.forEach(c => { pcts[c.name] = c.pct; });
+  return pcts;
+}
+
+function downloadExcel(rows, filename) {
+  try {
+    const wsData = [["SKU","CANTIDAD"], ...rows.map(r=>[r.sku, r.qty])];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = [{wch:28},{wch:12}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Distribución");
+    XLSX.writeFile(wb, filename + ".xlsx");
+  } catch(e) {
+    alert("Error al generar Excel: " + e.message);
+  }
+}
+
+function buildRows(distribucion) {
+  return distribucion.flatMap(c =>
+    c.filas.filter(f => f.qty > 0 && f.sku).map(f => ({ sku: f.sku, qty: f.qty }))
+  );
+}
+
+const SumBadge = ({sum}) => (
+  <span style={{fontSize:11,fontWeight:700,color:Math.abs(sum-100)<0.5?"#4ade80":"#f87171",marginLeft:8}}>
+    {Number(sum).toFixed(0)}% {Math.abs(sum-100)<0.5?"✓":"⚠"}
+  </span>
+);
+
+const DlBtn = ({onClick}) => (
+  <button onClick={onClick}
+    style={{display:"flex",alignItems:"center",gap:6,background:"#14532d",border:"1px solid #16a34a",
+      borderRadius:7,padding:"7px 14px",color:"#4ade80",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+    ⬇ Descargar Excel
+  </button>
+);
+
+function TabIndividual() {
+  const [modelo, setModelo] = useState("FUTALEUFÚ ADULT");
+  const [total, setTotal] = useState(28000);
+  const [temporada, setTemporada] = useState("2026");
+  const [expandido, setExpandido] = useState(null);
+  const [pcts, setPcts] = useState(() => {
+    const o={}; MODEL_NAMES.forEach(m=>{o[m]=initColorPcts(m);}); return o;
+  });
+  const currentPcts = pcts[modelo];
+  const sumPct = Object.values(currentPcts).reduce((a,b)=>a+(Number(b)||0),0);
+  const distribucion = useMemo(()=>calcDistribucion(modelo,total,currentPcts),[modelo,total,currentPcts]);
+  const grandTotal = distribucion.reduce((a,c)=>a+c.totalColor,0);
+  const setPct = (cn,v) => setPcts(p=>({...p,[modelo]:{...p[modelo],[cn]:v}}));
+  const handleDownload = () => downloadExcel(buildRows(distribucion), `${modelo}_${temporada}`);
+
+  return (
+    <div>
+      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:12,marginBottom:18}}>
+        {[["Modelo"],["Temporada","text"],["Cantidad Total","number"]].map(([label,type],i)=>(
+          <div key={label}>
+            <div style={{fontSize:10,color:"#94a3b8",marginBottom:5,textTransform:"uppercase",letterSpacing:1}}>{label}</div>
+            {i===0
+              ? <select value={modelo} onChange={e=>{setModelo(e.target.value);setExpandido(null);}}
+                  style={{background:"#1e2130",border:"1px solid #2d3350",borderRadius:7,padding:"8px 12px",color:"#f1f5f9",fontSize:13,outline:"none",width:"100%"}}>
+                  {MODEL_NAMES.map(m=><option key={m}>{m}</option>)}
+                </select>
+              : <input type={type} value={i===1?temporada:total} onChange={e=>i===1?setTemporada(e.target.value):setTotal(Number(e.target.value))}
+                  style={{background:"#1e2130",border:"1px solid #2d3350",borderRadius:7,padding:"8px 12px",color:"#f1f5f9",fontSize:13,outline:"none",width:"100%"}}/>
+            }
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:"#161922",border:"1px solid #252b40",borderRadius:12,padding:"14px 16px",marginBottom:18}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+          <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2}}>% por Color — {modelo}</div>
+          <SumBadge sum={sumPct}/>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(165px,1fr))",gap:8}}>
+          {MODELOS_DATA[modelo].colores.map(c=>(
+            <div key={c.name} style={{display:"flex",alignItems:"center",gap:7,background:"#1e2130",borderRadius:7,padding:"7px 10px"}}>
+              <div style={{width:7,height:7,borderRadius:"50%",background:getAccent(c.name),flexShrink:0}}/>
+              <div style={{fontSize:11,color:"#cbd5e1",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
+              <input type="number" min="0" max="100" value={currentPcts[c.name]} onChange={e=>setPct(c.name,e.target.value)}
+                style={{width:44,background:"#0f1117",border:"1px solid #2d3350",borderRadius:5,padding:"3px 5px",color:"#f1f5f9",fontSize:12,outline:"none",textAlign:"right"}}/>
+              <span style={{fontSize:10,color:"#64748b"}}>%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{background:"linear-gradient(135deg,#1a1f35,#1e2540)",border:"1px solid #2d3a5e",borderRadius:12,
+        padding:"12px 18px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:12,color:"#94a3b8"}}>{modelo} · {temporada}</div>
+          <div style={{fontSize:11,color:"#475569",marginTop:1}}>{distribucion.length} colores activos</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <DlBtn onClick={handleDownload}/>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:10,color:"#6C9BF5",textTransform:"uppercase",letterSpacing:1}}>Total</div>
+            <div style={{fontSize:24,fontWeight:800,color:"#6C9BF5"}}>{grandTotal.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>Resumen por Color</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:10,marginBottom:24}}>
+        {distribucion.map((c,i)=>(
+          <div key={c.name} onClick={()=>setExpandido(expandido===i?null:i)}
+            style={{background:expandido===i?"#1a2035":"#161922",border:`1px solid ${expandido===i?c.accent:"#252b40"}`,borderRadius:10,padding:"12px 14px",cursor:"pointer",transition:"all .2s"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontWeight:600,fontSize:12,color:"#f1f5f9"}}>{c.name}</div>
+                <div style={{fontSize:11,color:"#64748b",marginTop:1}}>{Number(currentPcts[c.name]||0).toFixed(0)}%</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:17,fontWeight:700,color:c.accent}}>{c.totalColor.toLocaleString()}</div>
+                <div style={{fontSize:10,color:"#475569"}}>uds</div>
+              </div>
+            </div>
+            <div style={{marginTop:8,background:"#0f1117",borderRadius:3,height:4}}>
+              <div style={{width:`${Math.min(Number(currentPcts[c.name]||0),100)}%`,background:c.accent,height:4,borderRadius:3}}/>
+            </div>
+            {expandido===i && (
+              <div style={{marginTop:10,borderTop:"1px solid #252b40",paddingTop:8}}>
+                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                  <thead><tr>{["SKU","Talla","Uds"].map(h=><th key={h} style={{textAlign:h==="Uds"?"right":"left",fontSize:10,color:"#475569",paddingBottom:4,fontWeight:500}}>{h}</th>)}</tr></thead>
+                  <tbody>{c.filas.map(f=>(
+                    <tr key={f.talla}>
+                      <td style={{fontSize:10,color:"#64748b",paddingBottom:3}}>{f.sku||"—"}</td>
+                      <td style={{fontSize:11,color:"#cbd5e1",paddingBottom:3}}>{f.talla}</td>
+                      <td style={{fontSize:11,fontWeight:600,color:c.accent,textAlign:"right",paddingBottom:3}}>{f.qty.toLocaleString()}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            )}
+            <div style={{fontSize:10,color:"#334155",marginTop:5,textAlign:"center"}}>{expandido===i?"▲ cerrar":"▼ ver detalle"}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:"#161922",border:"1px solid #252b40",borderRadius:12,overflow:"auto"}}>
+        <div style={{padding:"10px 14px",background:"#1e2130",borderBottom:"1px solid #252b40"}}>
+          <div style={{fontSize:10,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>Detalle Completo</div>
+        </div>
+        <table style={{width:"100%",borderCollapse:"collapse",minWidth:500}}>
+          <thead>
+            <tr style={{background:"#1e2130"}}>
+              {["Modelo","Color","SKU","Talla","Q Final"].map(h=>(
+                <th key={h} style={{padding:"9px 12px",textAlign:h==="Q Final"?"right":"left",fontSize:10,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:1,borderBottom:"1px solid #252b40"}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {distribucion.flatMap((c,ci)=>c.filas.map((f,fi)=>(
+              <tr key={`${ci}-${fi}`} style={{borderBottom:"1px solid #1a1f2e",background:fi%2===0?"transparent":"#13161f"}}>
+                <td style={{padding:"7px 12px",fontSize:10,color:"#64748b"}}>{fi===0?modelo:""}</td>
+                <td style={{padding:"7px 12px",fontSize:11,fontWeight:600,color:c.accent}}>{fi===0?c.name:""}</td>
+                <td style={{padding:"7px 12px",fontSize:10,color:"#64748b",fontFamily:"monospace"}}>{f.sku||"—"}</td>
+                <td style={{padding:"7px 12px",fontSize:11,color:"#cbd5e1"}}>{f.talla}</td>
+                <td style={{padding:"7px 12px",fontSize:11,fontWeight:700,color:"#f1f5f9",textAlign:"right"}}>{f.qty.toLocaleString()}</td>
+              </tr>
+            )))}
+            <tr style={{background:"#1e2130",borderTop:"2px solid #2d3a5e"}}>
+              <td colSpan={4} style={{padding:"10px 12px",fontSize:11,fontWeight:700,color:"#94a3b8"}}>TOTAL</td>
+              <td style={{padding:"10px 12px",fontSize:14,fontWeight:800,color:"#6C9BF5",textAlign:"right"}}>{grandTotal.toLocaleString()}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function TabMulti() {
+  const [temporada, setTemporada] = useState("2026");
+  const [totalGlobal, setTotalGlobal] = useState(10000);
+  const [modelos, setModelos] = useState([
+    {id:1,nombre:"FUTALEUFÚ ADULT",pctModelo:70},
+    {id:2,nombre:"NAVARINO",pctModelo:30},
+  ]);
+  const [colorPcts, setColorPcts] = useState(()=>{
+    const o={}; MODEL_NAMES.forEach(m=>{o[m]=initColorPcts(m);}); return o;
+  });
+  const [expandido, setExpandido] = useState(null);
+  const sumModelos = modelos.reduce((a,m)=>a+(Number(m.pctModelo)||0),0);
+
+  const addModelo = () => {
+    const disp = MODEL_NAMES.filter(n=>!modelos.find(m=>m.nombre===n));
+    if (!disp.length) return;
+    setModelos(p=>[...p,{id:Date.now(),nombre:disp[0],pctModelo:0}]);
+  };
+  const removeModelo = id => setModelos(p=>p.filter(m=>m.id!==id));
+  const updateModelo = (id,field,val) => setModelos(p=>p.map(m=>m.id===id?{...m,[field]:val}:m));
+  const setColorPct = (mn,cn,v) => setColorPcts(p=>({...p,[mn]:{...p[mn],[cn]:v}}));
+  const toggleExp = key => setExpandido(p=>p===key?null:key);
+
+  const distribucionPorModelo = useMemo(()=>modelos.map(m=>{
+    const totalM = Math.round(totalGlobal*(Number(m.pctModelo)||0)/100);
+    const dist = calcDistribucion(m.nombre,totalM,colorPcts[m.nombre]);
+    return {...m, totalUnidades:dist.reduce((a,c)=>a+c.totalColor,0), dist};
+  }),[modelos,totalGlobal,colorPcts]);
+
+  const grandTotal = distribucionPorModelo.reduce((a,m)=>a+m.totalUnidades,0);
+  const handleDownloadAll = () => {
+    const rows = distribucionPorModelo.flatMap(m => buildRows(m.dist));
+    downloadExcel(rows, `pedido_multimodelo_${temporada}`);
+  };
+
+  return (
+    <div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:18}}>
+        {[["Temporada",temporada,setTemporada,"text"],["Cantidad Total",totalGlobal,v=>setTotalGlobal(Number(v)),"number"]].map(([l,v,s,t])=>(
+          <div key={l}>
+            <div style={{fontSize:10,color:"#94a3b8",marginBottom:5,textTransform:"uppercase",letterSpacing:1}}>{l}</div>
+            <input type={t} value={v} onChange={e=>s(e.target.value)}
+              style={{background:"#1e2130",border:"1px solid #2d3350",borderRadius:7,padding:"8px 12px",color:"#f1f5f9",fontSize:13,outline:"none",width:"100%"}}/>
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:"#161922",border:"1px solid #252b40",borderRadius:12,padding:"14px 16px",marginBottom:18}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2}}>Modelos del Pedido</div>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <SumBadge sum={sumModelos}/>
+            {modelos.length < MODEL_NAMES.length &&
+              <button onClick={addModelo} style={{background:"#1e2540",border:"1px solid #2d3a5e",borderRadius:6,padding:"5px 12px",color:"#6C9BF5",fontSize:11,cursor:"pointer"}}>+ Agregar modelo</button>}
+          </div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {modelos.map((m,mi)=>{
+            const disp = MODEL_NAMES.filter(n=>n===m.nombre||!modelos.find(x=>x.id!==m.id&&x.nombre===n));
+            const sumColor = Object.values(colorPcts[m.nombre]).reduce((a,b)=>a+(Number(b)||0),0);
+            const isExp = expandido===`m-${m.id}`;
+            const totalM = Math.round(totalGlobal*(Number(m.pctModelo)||0)/100);
+            return (
+              <div key={m.id} style={{background:"#1a1f2e",border:`1px solid ${isExp?MODEL_COLORS[mi%4]:"#252b40"}`,borderRadius:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px"}}>
+                  <div style={{width:10,height:10,borderRadius:2,background:MODEL_COLORS[mi%4],flexShrink:0}}/>
+                  <select value={m.nombre} onChange={e=>updateModelo(m.id,"nombre",e.target.value)}
+                    style={{background:"#0f1117",border:"1px solid #2d3350",borderRadius:6,padding:"5px 8px",color:"#f1f5f9",fontSize:12,outline:"none",flex:1}}>
+                    {disp.map(n=><option key={n}>{n}</option>)}
+                  </select>
+                  <div style={{display:"flex",alignItems:"center",gap:4}}>
+                    <input type="number" min="0" max="100" value={m.pctModelo} onChange={e=>updateModelo(m.id,"pctModelo",e.target.value)}
+                      style={{width:52,background:"#0f1117",border:"1px solid #2d3350",borderRadius:5,padding:"5px 6px",color:"#f1f5f9",fontSize:12,outline:"none",textAlign:"right"}}/>
+                    <span style={{fontSize:11,color:"#64748b"}}>%</span>
+                    <span style={{fontSize:11,color:"#475569",marginLeft:4}}>→ {totalM.toLocaleString()} uds</span>
+                  </div>
+                  <button onClick={()=>toggleExp(`m-${m.id}`)} style={{background:"none",border:"none",color:"#6C9BF5",cursor:"pointer",fontSize:12,padding:"0 4px"}}>{isExp?"▲":"▼"}</button>
+                  {modelos.length>1 && <button onClick={()=>removeModelo(m.id)} style={{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:14,padding:"0 2px"}}>×</button>}
+                </div>
+                {isExp && (
+                  <div style={{borderTop:"1px solid #252b40",padding:"12px 14px"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                      <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>% por Color</div>
+                      <SumBadge sum={sumColor}/>
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:6}}>
+                      {MODELOS_DATA[m.nombre].colores.map(c=>(
+                        <div key={c.name} style={{display:"flex",alignItems:"center",gap:6,background:"#161922",borderRadius:6,padding:"6px 8px"}}>
+                          <div style={{width:6,height:6,borderRadius:"50%",background:getAccent(c.name),flexShrink:0}}/>
+                          <div style={{fontSize:11,color:"#cbd5e1",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
+                          <input type="number" min="0" max="100" value={colorPcts[m.nombre][c.name]} onChange={e=>setColorPct(m.nombre,c.name,e.target.value)}
+                            style={{width:40,background:"#0f1117",border:"1px solid #2d3350",borderRadius:4,padding:"3px 4px",color:"#f1f5f9",fontSize:11,outline:"none",textAlign:"right"}}/>
+                          <span style={{fontSize:10,color:"#64748b"}}>%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{background:"linear-gradient(135deg,#1a1f35,#1e2540)",border:"1px solid #2d3a5e",borderRadius:12,
+        padding:"12px 18px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:12,color:"#94a3b8"}}>Pedido Multi-Modelo · {temporada}</div>
+          <div style={{fontSize:11,color:"#475569",marginTop:1}}>{modelos.length} modelos</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <DlBtn onClick={handleDownloadAll}/>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:10,color:"#6C9BF5",textTransform:"uppercase",letterSpacing:1}}>Total</div>
+            <div style={{fontSize:24,fontWeight:800,color:"#6C9BF5"}}>{grandTotal.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>Resumen por Modelo</div>
+      <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
+        {distribucionPorModelo.map((m,mi)=>{
+          const isExp = expandido===`res-${m.id}`;
+          const mc = MODEL_COLORS[mi%4];
+          return (
+            <div key={m.id} style={{background:"#161922",border:`1px solid ${isExp?mc:"#252b40"}`,borderRadius:12}}>
+              <div onClick={()=>toggleExp(`res-${m.id}`)}
+                style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",cursor:"pointer"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:10,height:10,borderRadius:2,background:mc}}/>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#f1f5f9"}}>{m.nombre}</div>
+                    <div style={{fontSize:11,color:"#64748b",marginTop:1}}>{m.pctModelo}% · {m.dist.length} colores</div>
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:16}}>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:20,fontWeight:800,color:mc}}>{m.totalUnidades.toLocaleString()}</div>
+                    <div style={{fontSize:10,color:"#475569"}}>uds</div>
+                  </div>
+                  <span style={{color:mc,fontSize:13}}>{isExp?"▲":"▼"}</span>
+                </div>
+              </div>
+              <div style={{height:3,background:"#0f1117",margin:"0 16px"}}>
+                <div style={{width:`${Math.min(m.pctModelo,100)}%`,background:mc,height:3}}/>
+              </div>
+              {isExp && (
+                <div style={{padding:"14px 16px",borderTop:"1px solid #252b40",marginTop:4}}>
+                  <div style={{background:"#0f1117",borderRadius:8,overflow:"auto"}}>
+                    <table style={{width:"100%",borderCollapse:"collapse",minWidth:400}}>
+                      <thead>
+                        <tr>{["Color","SKU","Talla","Q Final"].map(h=>(
+                          <th key={h} style={{padding:"7px 10px",textAlign:h==="Q Final"?"right":"left",fontSize:9,color:"#475569",fontWeight:600,textTransform:"uppercase",borderBottom:"1px solid #1a1f2e"}}>{h}</th>
+                        ))}</tr>
+                      </thead>
+                      <tbody>
+                        {m.dist.flatMap((c,ci)=>c.filas.map((f,fi)=>(
+                          <tr key={`${ci}-${fi}`} style={{borderBottom:"1px solid #161922",background:fi%2===0?"transparent":"#13161f"}}>
+                            <td style={{padding:"5px 10px",fontSize:10,fontWeight:fi===0?600:400,color:fi===0?c.accent:"#334155"}}>{fi===0?c.name:""}</td>
+                            <td style={{padding:"5px 10px",fontSize:10,color:"#64748b",fontFamily:"monospace"}}>{f.sku||"—"}</td>
+                            <td style={{padding:"5px 10px",fontSize:10,color:"#cbd5e1"}}>{f.talla}</td>
+                            <td style={{padding:"5px 10px",fontSize:10,fontWeight:700,color:"#f1f5f9",textAlign:"right"}}>{f.qty.toLocaleString()}</td>
+                          </tr>
+                        )))}
+                        <tr style={{background:"#1a1f2e",borderTop:"1px solid #252b40"}}>
+                          <td colSpan={3} style={{padding:"7px 10px",fontSize:10,fontWeight:700,color:"#94a3b8"}}>SUBTOTAL {m.nombre}</td>
+                          <td style={{padding:"7px 10px",fontSize:12,fontWeight:800,color:mc,textAlign:"right"}}>{m.totalUnidades.toLocaleString()}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{fontSize:10,color:"#334155",textAlign:"center",paddingBottom:20}}>
+        Haz clic en cada modelo para expandir · Luego clic en cada color para ver distribución por talla
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [tab, setTab] = useState("individual");
+  return (
+    <div style={{minHeight:"100vh",background:"#0f1117",color:"#e2e8f0",fontFamily:"'Segoe UI',sans-serif",padding:"20px 14px"}}>
+      <div style={{maxWidth:960,margin:"0 auto"}}>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:10,letterSpacing:3,color:"#6C9BF5",textTransform:"uppercase",marginBottom:4}}>Distribución de Producción</div>
+          <h1 style={{margin:0,fontSize:21,fontWeight:700,color:"#f1f5f9"}}>Calculadora de Órdenes 2026</h1>
+        </div>
+        <div style={{display:"flex",gap:4,marginBottom:22,background:"#161922",borderRadius:10,padding:4,width:"fit-content"}}>
+          {[["individual","📦 Modelo Individual"],["multi","🗂 Pedido Multi-Modelo"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setTab(k)}
+              style={{padding:"8px 18px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,
+                background:tab===k?"#1e2540":"transparent",color:tab===k?"#6C9BF5":"#64748b",transition:"all .2s"}}>
+              {l}
+            </button>
+          ))}
+        </div>
+        {tab==="individual" ? <TabIndividual/> : <TabMulti/>}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
