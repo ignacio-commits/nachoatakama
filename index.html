@@ -1,502 +1,586 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Calculadora de Producción 2026</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f1117; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
-    input[type=number]::-webkit-inner-spin-button { opacity: 0.4; }
-    select option { background: #1e2130; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f1117; }
-    ::-webkit-scrollbar-thumb { background: #2d3350; border-radius: 3px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotizador Atakama Outdoor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f4f4f4;color:#1a1a1a;font-size:14px}
+header{background:#1a1a1a;padding:10px 24px;display:flex;align-items:center}
+.app{max-width:960px;margin:0 auto;padding:20px}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:20px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #eee}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field label{font-size:11px;color:#888;margin-bottom:4px;display:block;font-weight:500}
+input{width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;color:#1a1a1a;outline:none;background:#fff}
+input:focus{border-color:#1a1a1a}
+.search-wrap{position:relative}
+.dd{position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;z-index:999;max-height:260px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:none}
+.dd-head{display:grid;grid-template-columns:140px 1fr 100px;gap:8px;padding:6px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:#999;border-bottom:1px solid #eee;background:#f9f9f9}
+.dd-row{display:grid;grid-template-columns:140px 1fr 100px;gap:8px;align-items:center;padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0}
+.dd-row:last-child{border-bottom:none}
+.dd-row:hover{background:#f5f5f5}
+.dd-sku{font-size:11px;font-family:monospace;font-weight:700}
+.dd-name{font-size:12px;color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-price{font-size:12px;font-weight:600;text-align:right}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:#888;text-align:left;padding:8px 10px;border-bottom:1px solid #eee}
+td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-align:middle}
+.tr{text-align:right}.tc{text-align:center}
+.qinput{width:60px;text-align:center}
+.bdel{background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.bdel:hover{background:#fee;color:#c00}
+.disc-row{display:flex;align-items:center;gap:8px;margin-top:16px}
+.disc-row label{font-size:12px;color:#888;font-weight:500;white-space:nowrap}
+.totals{display:flex;justify-content:flex-end;margin-top:12px}
+.ttable{width:260px;border-collapse:collapse}
+.ttable td{padding:5px 8px;font-size:13px}
+.tlbl{color:#888}
+.trow-final td{font-weight:600;font-size:14px;border-top:1px solid #ddd;padding-top:8px}
+.btn{border:1px solid #ddd;background:#fff;color:#1a1a1a;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500}
+.btn:hover{background:#f5f5f5}
+.btnp{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btnp:hover{background:#333}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.empty{text-align:center;padding:32px;color:#aaa;font-size:13px}
+.hrow{display:flex;align-items:center}
+.cotn{font-size:13px;color:#999;margin-left:auto}
+.smsg{font-size:12px;padding:8px 14px;border-radius:6px;margin-top:10px;display:none}
+.sok{background:#eaf3de;color:#3b6d11;display:block}
+.serr{background:#fee;color:#c00;display:block}
+</style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useMemo } = React;
 
-const SKUS = {
-  "FUTALEUFÚ ADULT": {
-    "AZUL MARINO":    {"36-37":"PFUTAZMN_3637","38-39":"PFUTAZMN_3839","40-41":"PFUTAZMN_4041","42-43":"PFUTAZMN_4243","44-45":"PFUTAZMN_4445"},
-    "BEIGE ANIMAL PR":{"34-35":"PFUTBEFPN_3435","36-37":"PFUTBEFPN_3637","38-39":"PFUTBEFPN_3839","40-41":"PFUTBEFPN_4041"},
-    "BURDEO":         {"36-37":"PFUTBURN_3637","38-39":"PFUTBURN_3839","40-41":"PFUTBURN_4041","42-43":"PFUTBURN_4243","44-45":"PFUTBURN_4445"},
-    "CAFÉ":           {"36-37":"PFUTCAFN_3637","38-39":"PFUTCAFN_3839","40-41":"PFUTCAFN_4041","42-43":"PFUTCAFN_4243","44-45":"PFUTCAFN_4445"},
-    "PRINT MUJER 2":  {"34-35":"PFUTCAFPN_3435","36-37":"PFUTCAFPN_3637","38-39":"PFUTCAFPN_3839","40-41":"PFUTCAFPN_4041"},
-    "CELESTE PETRÓL": {"36-37":"PFUTCELN_3637","38-39":"PFUTCELN_3839","40-41":"PFUTCELN_4041","42-43":"PFUTCELN_4243","44-45":"PFUTCELN_4445"},
-    "NEGRO CAFÉ":     {"36-37":"PFUTNGRCN_3637","38-39":"PFUTNGRCN_3839","40-41":"PFUTNGRCN_4041","42-43":"PFUTNGRCN_4243","44-45":"PFUTNGRCN_4445"},
-    "NEGRO GRIS":     {"36-37":"PFUTNGRN_3637","38-39":"PFUTNGRN_3839","40-41":"PFUTNGRN_4041","42-43":"PFUTNGRN_4243","44-45":"PFUTNGRN_4445","46-47":"PFUTNGRN_4647"},
-    "VERDE":          {"36-37":"PFUTVRMN_3637","38-39":"PFUTVRMN_3839","40-41":"PFUTVRMN_4041","42-43":"PFUTVRMN_4243","44-45":"PFUTVRMN_4445"},
-  },
-  "NAVARINO": {
-    "AZUL MARINO":    {"36-37":"PNAVAZMN_3637","38-39":"PNAVAZMN_3839","40-41":"PNAVAZMN_4041","42-43":"PNAVAZMN_4243","44-45":"PNAVAZMN_4445"},
-    "IGE ANIMAL PR":  {"34-35":"PNAVBEFPN_3435","36-37":"PNAVBEFPN_3637","38-39":"PNAVBEFPN_3839","40-41":"PNAVBEFPN_4041"},
-    "BURDEO":         {"36-37":"PNAVBURN_3637","38-39":"PNAVBURN_3839","40-41":"PNAVBURN_4041","42-43":"PNAVBURN_4243","44-45":"PNAVBURN_4445"},
-    "CAFÉ":           {"36-37":"PNAVCAFN_3637","38-39":"PNAVCAFN_3839","40-41":"PNAVCAFN_4041","42-43":"PNAVCAFN_4243","44-45":"PNAVCAFN_4445"},
-    "NEGRO GRIS":     {"36-37":"PNAVNGRN_3637","38-39":"PNAVNGRN_3839","40-41":"PNAVNGRN_4041","42-43":"PNAVNGRN_4243","44-45":"PNAVNGRN_4445"},
-    "VERDE":          {"36-37":"PNAVVRMN_3637","38-39":"PNAVVRMN_3839","40-41":"PNAVVRMN_4041","42-43":"PNAVVRMN_4243","44-45":"PNAVVRMN_4445"},
-  },
-  "TORTEL": {
-    "NEGRO GRIS":     {"36-37":"PTORNGR_3637","38-39":"PTORNGR_3839","40-41":"PTORNGR_4041","42-43":"PTORNGR_4243","44-45":"PTORNGR_4445"},
-  },
-};
+<header>
+  <img src="https://i.imgur.com/26BHPj5.png" style="height:40px;object-fit:contain">
+</header>
 
-const MODELOS_DATA = {
-  "FUTALEUFÚ ADULT": { colores: [
-    { name:"NEGRO GRIS", pct:32, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.20},{talla:"40-41",curva:0.30},{talla:"42-43",curva:0.20},{talla:"44-45",curva:0.12},{talla:"46-47",curva:0.08}]},
-    { name:"AZUL MARINO", pct:14, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.40},{talla:"44-45",curva:0.20}]},
-    { name:"BEIGE ANIMAL PR", pct:10, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.40},{talla:"40-41",curva:0.10}]},
-    { name:"VERDE", pct:10, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.16},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.33},{talla:"44-45",curva:0.21}]},
-    { name:"CAFÉ", pct:9, tallas:[{talla:"36-37",curva:0.03},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.36},{talla:"44-45",curva:0.21}]},
-    { name:"CELESTE PETRÓL", pct:9, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.23},{talla:"40-41",curva:0.18},{talla:"42-43",curva:0.23},{talla:"44-45",curva:0.16}]},
-    { name:"BURDEO", pct:7, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.20},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.33},{talla:"44-45",curva:0.18}]},
-    { name:"PRINT MUJER 2", pct:5, tallas:[{talla:"34-35",curva:0.08},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.40},{talla:"40-41",curva:0.12}]},
-    { name:"NEGRO CAFÉ", pct:4, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
-  ]},
-  "NAVARINO": { colores: [
-    { name:"NEGRO GRIS", pct:41, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.17},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.32},{talla:"44-45",curva:0.15},{talla:"46-47",curva:0.05}]},
-    { name:"AZUL MARINO", pct:15, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.17},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.36},{talla:"44-45",curva:0.16}]},
-    { name:"IGE ANIMAL PR", pct:17, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
-    { name:"VERDE", pct:10, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.24},{talla:"44-45",curva:0.18}]},
-    { name:"CAFÉ", pct:7, tallas:[{talla:"36-37",curva:0.22},{talla:"38-39",curva:0.26},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.21},{talla:"44-45",curva:0.11}]},
-    { name:"CELESTE PETRÓLEO", pct:0, tallas:[{talla:"36-37",curva:0.21},{talla:"38-39",curva:0.23},{talla:"40-41",curva:0.23},{talla:"42-43",curva:0.23},{talla:"44-45",curva:0.10}]},
-    { name:"BURDEO", pct:7, tallas:[{talla:"36-37",curva:0.22},{talla:"38-39",curva:0.26},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.21},{talla:"44-45",curva:0.11}]},
-    { name:"PRINT MUJER 2", pct:0, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
-    { name:"NEGRO CAFÉ", pct:0, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
-  ]},
-  "TORTEL": { colores: [
-    { name:"NEGRO GRIS", pct:100, tallas:[{talla:"36-37",curva:0.10},{talla:"38-39",curva:0.17},{talla:"40-41",curva:0.21},{talla:"42-43",curva:0.32},{talla:"44-45",curva:0.16},{talla:"46-47",curva:0.04}]},
-    { name:"AZUL MARINO", pct:0, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
-    { name:"ANIMAL PRINT", pct:0, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
-    { name:"VERDE", pct:0, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.28},{talla:"44-45",curva:0.14}]},
-    { name:"CAFÉ", pct:0, tallas:[{talla:"36-37",curva:0.22},{talla:"38-39",curva:0.26},{talla:"40-41",curva:0.20},{talla:"42-43",curva:0.21},{talla:"44-45",curva:0.11}]},
-    { name:"CELESTE PETRÓLEO", pct:0, tallas:[{talla:"36-37",curva:0.21},{talla:"38-39",curva:0.23},{talla:"40-41",curva:0.18},{talla:"42-43",curva:0.23},{talla:"44-45",curva:0.15}]},
-    { name:"BURDEO", pct:0, tallas:[{talla:"36-37",curva:0.20},{talla:"38-39",curva:0.19},{talla:"40-41",curva:0.19},{talla:"42-43",curva:0.19},{talla:"44-45",curva:0.19}]},
-    { name:"PRINT MUJER 2", pct:0, tallas:[{talla:"34-35",curva:0.10},{talla:"36-37",curva:0.40},{talla:"38-39",curva:0.36},{talla:"40-41",curva:0.14}]},
-    { name:"NEGRO CAFÉ", pct:0, tallas:[{talla:"36-37",curva:0.05},{talla:"38-39",curva:0.10},{talla:"40-41",curva:0.22},{talla:"42-43",curva:0.43},{talla:"44-45",curva:0.20}]},
-  ]},
-};
+<div class="app">
+  <div class="card">
+    <div class="hrow card-title">
+      <span>Datos del cliente</span>
+      <span class="cotn" id="cotLabel">Cotización N° —</span>
+    </div>
+    <div class="g3" style="margin-bottom:12px">
+      <div class="field"><label>Empresa</label><input id="empresa" placeholder="Nombre empresa"></div>
+      <div class="field"><label>RUT empresa</label><input id="rut" placeholder="76.xxx.xxx-x"></div>
+      <div class="field"><label>Contacto</label><input id="contacto" placeholder="Nombre contacto"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
+      <div class="field"><label>N° Cotización</label><input type="number" id="cotNum" min="1" value="" oninput="updateLbl()"></div>
+    </div>
+  </div>
 
-const MODEL_NAMES = Object.keys(MODELOS_DATA);
-const COLOR_MAP = {
-  "NEGRO GRIS":"#6b7280","AZUL MARINO":"#1e3a5f","BEIGE ANIMAL PR":"#c8a97e",
-  "IGE ANIMAL PR":"#c8a97e","ANIMAL PRINT":"#c8a97e","VERDE":"#4a7c59",
-  "CAFÉ":"#6f4e37","CELESTE PETRÓL":"#2e7d8a","CELESTE PETRÓLEO":"#2e7d8a",
-  "BURDEO":"#7b2d3e","PRINT MUJER 2":"#c084fc","NEGRO CAFÉ":"#3d2b1f",
-};
-const getAccent = n => COLOR_MAP[n] || "#6C9BF5";
-const MODEL_COLORS = ["#6C9BF5","#4FC3F7","#A5D6A7","#FFCC80"];
+  <div class="card">
+    <div class="card-title">Agregar productos</div>
+    <div class="search-wrap">
+      <input id="searchInput" type="text" placeholder="Buscar por SKU o nombre de producto..." autocomplete="off">
+      <div class="dd" id="dd">
+        <div class="dd-head"><span>SKU</span><span>Descripción</span><span style="text-align:right">Precio Neto</span></div>
+        <div id="ddBody"></div>
+      </div>
+    </div>
+  </div>
 
-function getSku(modelo, color, talla) {
-  return SKUS[modelo]?.[color]?.[talla] || "";
+  <div class="card">
+    <div class="card-title">Detalle cotización</div>
+    <div class="empty" id="emptyState">Agrega productos usando el buscador</div>
+    <table id="tbl" style="display:none">
+      <thead>
+        <tr>
+          <th style="width:140px">Código</th>
+          <th>Descripción</th>
+          <th class="tc" style="width:72px">Cant.</th>
+          <th class="tr" style="width:110px">Precio Neto</th>
+          <th class="tr" style="width:110px">Total Neto</th>
+          <th style="width:36px"></th>
+        </tr>
+      </thead>
+      <tbody id="tblBody"></tbody>
+    </table>
+    <div class="disc-row">
+      <label>Descuento global:</label>
+      <input type="number" id="discount" min="0" max="100" value="0" style="width:80px;text-align:center" oninput="recalc()">
+      <span style="font-size:13px;color:#888">%</span>
+    </div>
+    <div class="totals">
+      <table class="ttable">
+        <tr><td class="tlbl">Subtotal neto</td><td class="tr" id="tSub">$0</td></tr>
+        <tr><td class="tlbl" id="tDiscLbl">Descuento (0%)</td><td class="tr" id="tDisc" style="color:#c00">-$0</td></tr>
+        <tr><td class="tlbl">Valor neto</td><td class="tr" id="tNet">$0</td></tr>
+        <tr><td class="tlbl">IVA 19%</td><td class="tr" id="tIva">$0</td></tr>
+        <tr class="trow-final"><td>Total</td><td class="tr" id="tTotal">$0</td></tr>
+      </table>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="clearAll()">Nueva cotización</button>
+      <button class="btn" onclick="saveSheets()">Guardar en Sheets</button>
+      <button class="btn btnp" onclick="makePDF()">Descargar PDF</button>
+    </div>
+    <div id="smsg" class="smsg"></div>
+  </div>
+</div>
+
+<script>
+const SHEETS_URL='https://script.google.com/macros/s/AKfycbwooW0heR5tHuksUMK4fJgBnds4lDUO5f5Cki-ZWQ2FRUg_Wb5fuoxtDfVdde_CCelk/exec';
+
+const P=[
+{s:"BANLOALM_GR",n:"BANDANA LANA MERINO LOA GRIS",p:12600},
+{s:"BANLOALM_VR",n:"BANDANA LANA MERINO LOA VERDE",p:12600},
+{s:"BANPALPAL_CEL",n:"BANDANA COOLMAX PALENA CELESTE",p:5037},
+{s:"BANPALPTC_NG",n:"BANDANA COOLMAX PALENA NEGRO",p:5037},
+{s:"BUSAAD_GR",n:"BUCKET ADULTO SALADO GRIS",p:6550},
+{s:"BUSAAD_VR",n:"BUCKET ADULTO SALADO VERDE",p:6550},
+{s:"BUSANI_AP",n:"BUCKET NIÑO SALADO AZUL",p:5037},
+{s:"BUSANI_VP",n:"BUCKET NIÑO SALADO VERDE",p:5037},
+{s:"JDJUNC_VER",n:"JOCKEY DEPORTIVO JUNCAL VERDE",p:10079},
+{s:"JFPDEN_GR",n:"JOCKEY DEPORTIVO ENCO NEGRO",p:11087},
+{s:"JFPDEN_VR",n:"JOCKEY FIVE PANEL ENCO VERDE",p:11087},
+{s:"JFPPUE_AZ",n:"JOCKEY FIVE PANEL PUELO AZUL",p:10079},
+{s:"JFPPUE_CAF",n:"JOCKEY FIVE PANEL PUELO CAFÉ/VERDE",p:10079},
+{s:"JFPREVAZ",n:"JOCKEY REVERSIBLE ESPOLÓN AZUL",p:11087},
+{s:"JTRUCAU_CC",n:"JOCKEY TRUCKER CAUTÍN CAFÉ",p:9575},
+{s:"JTRUCAU_NG",n:"JOCKEY TRUCKER CAUTÍN NEGRO",p:9575},
+{s:"SOMLIRGRI_SM",n:"SOMBRERO LIRCAY GRIS S/M",p:13104},
+{s:"SOMLIRVR_SM",n:"SOMBRERO LIRCAY VERDE S/M",p:13104},
+{s:"CINTRALM_BE",n:"CINTILLO LANA MERINO TRANCURA BEIGE",p:11087},
+{s:"GBEACHO_CG",n:"GORRO BEANIE CHOAPA GRIS",p:7558},
+{s:"GBEACHO_NG",n:"GORRO BEANIE CHOAPA NEGRO",p:7558},
+{s:"GBEACHO_VR",n:"GORRO BEANIE CHOAPA VERDE",p:7558},
+{s:"GBEALIM_AM",n:"GORRO BEANIE LIMARÍ AMBAR",p:7558},
+{s:"GBEALIM_GR",n:"GORRO BEANIE LIMARÍ GRIS",p:7558},
+{s:"GBEATRALM_BE",n:"GORRO BEANIE LANA MERINO TRANCURA BEIGE",p:11087},
+{s:"CCOOLAZ_SM",n:"CALCETÍN DEPORTIVO COOLMAX CORCOVADO GRIS S/M",p:6550},
+{s:"CCOOLAZ_LXL",n:"CALCETÍN DEPORTIVO COOLMAX CORCOVADO GRIS L/XL",p:6550},
+{s:"GPCLMNGR_SM",n:"GUANTE PRIMERA CAPA LANA MERINO SERRANO NEGRO S/M",p:12600},
+{s:"GPCNGR_SM",n:"GUANTE PRIMERA CAPA QUECO NEGRO S/M",p:10583},
+{s:"PCTERHNG_S",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS S",p:11087},
+{s:"PCTERHNG_M",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS M",p:11087},
+{s:"PCTERHNG_L",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS L",p:11087},
+{s:"PCTERHNG_XL",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS XL",p:11087},
+{s:"PCULHNG_S",n:"PRIMERA CAPA TÉRMICA HOMBRE VENTOFIT NEGRO S",p:18650},
+{s:"PCULHNG_XL",n:"PRIMERA CAPA TÉRMICA HOMBRE VENTOFIT NEGRO XL",p:18650},
+{s:"PMCCPBL_S",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO S",p:10079},
+{s:"PMCCPBL_M",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO M",p:10079},
+{s:"PMCCPBL_L",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO L",p:10079},
+{s:"PMCCPBL_XL",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO XL",p:10079},
+{s:"PMCEQBR_S",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO S",p:9575},
+{s:"PMCEQBR_M",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO M",p:9575},
+{s:"PMCEQBR_L",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO L",p:9575},
+{s:"PMCEQBR_XL",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO XL",p:9575},
+{s:"PMCMOBL_S",n:"POLERA MC HOMBRE MOCHILERA BLANCO S",p:9575},
+{s:"PMCMOBL_M",n:"POLERA MC HOMBRE MOCHILERA BLANCO M",p:9575},
+{s:"PMCMOBL_XL",n:"POLERA MC HOMBRE MOCHILERA BLANCO XL",p:9575},
+{s:"PODEHDIAZ_S",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL S",p:11087},
+{s:"PODEHDIAZ_M",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL M",p:11087},
+{s:"PODEHDIAZ_L",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL L",p:11087},
+{s:"PODEHDIAZ_XL",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL XL",p:11087},
+{s:"PODEHDIGC_S",n:"POLERA DRY CORE HOMBRE DINÁMICA GRIS S",p:11087},
+{s:"PODEHDIGC_M",n:"POLERA DRY CORE HOMBRE DINÁMICA GRIS M",p:11087},
+{s:"PODEHDIGC_L",n:"POLERA DRY CORE HOMBRE DINÁMICA GRIS L",p:11087},
+{s:"CAMCHHOVR_S",n:"CAMISA MC HOMBRE HORIZONTE VERDE S",p:20163},
+{s:"CAMCHHOVR_M",n:"CAMISA MC HOMBRE HORIZONTE VERDE M",p:20163},
+{s:"CAMCHHOVR_L",n:"CAMISA MC HOMBRE HORIZONTE VERDE L",p:20163},
+{s:"CAMCHHOAZ_S",n:"CAMISA MC HOMBRE HORIZONTE AZUL S",p:20163},
+{s:"CAMCHHOAZ_M",n:"CAMISA MC HOMBRE HORIZONTE AZUL M",p:20163},
+{s:"CAMCHHOAZ_L",n:"CAMISA MC HOMBRE HORIZONTE AZUL L",p:20163},
+{s:"PODEMDICE_XS",n:"POLERA DRY CORE MUJER DINÁMICA CELESTE XS",p:11087},
+{s:"PODEMDICE_S",n:"POLERA DRY CORE MUJER DINÁMICA CELESTE S",p:11087},
+{s:"PODEMDICE_M",n:"POLERA DRY CORE MUJER DINÁMICA CELESTE M",p:11087},
+{s:"PODEMDIGR_XS",n:"POLERA DRY CORE MUJER DINÁMICA GRIS XS",p:11087},
+{s:"PODEMDIGR_S",n:"POLERA DRY CORE MUJER DINÁMICA GRIS S",p:11087},
+{s:"PEDPAZ_XS",n:"PETO DEPORTIVO MUJER AURA FITFLEX AZUL XS",p:11592},
+{s:"PEDPAZ_S",n:"PETO DEPORTIVO MUJER AURA FITFLEX AZUL S",p:11592},
+{s:"PEDPNG_XS",n:"PETO DEPORTIVO MUJER AURA FITFLEX NEGRO XS",p:11592},
+{s:"PEDPNG_S",n:"PETO DEPORTIVO MUJER AURA FITFLEX NEGRO S",p:11592},
+{s:"PCOVENHNG_S",n:"POLAR CORTAVIENTO VENT-OFF HOMBRE PATAGÓN NEGRO S",p:32768},
+{s:"PCOVENHNG_M",n:"POLAR CORTAVIENTO VENT-OFF HOMBRE PATAGÓN NEGRO M",p:32768},
+{s:"PTEXHCAFZ_S",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO CAFÉ S",p:22684},
+{s:"PTEXHCAFZ_M",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO CAFÉ M",p:22684},
+{s:"PTEXHCAFZ_L",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO CAFÉ L",p:22684},
+{s:"PTEXHGRFZ_S",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO GRIS S",p:22684},
+{s:"PTEXHGRFZ_M",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO GRIS M",p:22684},
+{s:"PTEXHGR_S",n:"POLAR TEXTURADO HOMBRE VENTISQUERO GRIS S",p:20163},
+{s:"PTEXHVR_S",n:"POLAR TEXTURADO HOMBRE VENTISQUERO VERDE S",p:20163},
+{s:"PTEXMBEFZ_XS",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO BEIGE XS",p:22684},
+{s:"PTEXMBEFZ_S",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO BEIGE S",p:22684},
+{s:"PTEXMBEFZ_M",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO BEIGE M",p:22684},
+{s:"PTEXMGRFZ_XS",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO GRIS XS",p:22684},
+{s:"PTEXMGR_XS",n:"POLAR TEXTURADO MUJER VENTISQUERO GRIS XS",p:20163},
+{s:"PTEXMRO_XS",n:"POLAR TEXTURADO MUJER VENTISQUERO BURDEO XS",p:20163},
+{s:"CHIMHFRNG_S",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO S",p:40331},
+{s:"CHIMHFRNG_M",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO M",p:40331},
+{s:"CHIMHFRNG_L",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO L",p:40331},
+{s:"CHIMHFRNG_XL",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO XL",p:40331},
+{s:"PATEHAM_L",n:"PARKA TERMICA HOMBRE INDÓMITA AMARILLO L",p:45373},
+{s:"PATEHNONG_S",n:"PARKA TERMICA HOMBRE NÓMADA NEGRO S",p:40331},
+{s:"PATEHNONG_M",n:"PARKA TERMICA HOMBRE NÓMADA NEGRO M",p:40331},
+{s:"CHIMMFRNG_XS",n:"IMPERMEABLE MUJER FRONTERA NEGRO XS",p:40331},
+{s:"CHIMMFRNG_S",n:"IMPERMEABLE MUJER FRONTERA NEGRO S",p:40331},
+{s:"CHIMMFRNG_M",n:"IMPERMEABLE MUJER FRONTERA NEGRO M",p:40331},
+{s:"PATEMNONG_S",n:"PARKA TERMICA MUJER NÓMADA NEGRO S",p:40331},
+{s:"PATEMNONG_M",n:"PARKA TERMICA MUJER NÓMADA NEGRO M",p:40331},
+{s:"PADEHTRGR_30",n:"PANTALON DESMONTABLE HOMBRE TRAVESÍA GRIS 30",p:28734},
+{s:"PADEHTRGR_32",n:"PANTALON DESMONTABLE HOMBRE TRAVESÍA GRIS 32",p:28734},
+{s:"PADEHTRGR_34",n:"PANTALON DESMONTABLE HOMBRE TRAVESÍA GRIS 34",p:28734},
+{s:"PADEMTRGR_34",n:"PANTALON DESMONTABLE MUJER TRAVESÍA GRIS 34",p:28734},
+{s:"PADEMTRGR_36",n:"PANTALON DESMONTABLE MUJER TRAVESÍA GRIS 36",p:28734},
+{s:"SDHTFNG_S",n:"SHORT DEPORTIVO HOMBRE TRAILFIT NEGRO S",p:15121},
+{s:"SDHTFNG_M",n:"SHORT DEPORTIVO HOMBRE TRAILFIT NEGRO M",p:14617},
+{s:"SDHTFNG_L",n:"SHORT DEPORTIVO HOMBRE TRAILFIT NEGRO L",p:14617},
+{s:"CABING_XS",n:"CALZA BIKER MUJER HALO FLIXFLEX NEGRO XS",p:11592},
+{s:"CABIAZ_XS",n:"CALZA BIKER MUJER HALO FLIXFLEX AZUL XS",p:11592},
+{s:"CADEMVR_XS",n:"CALZA DEPORTIVA MUJER PANORAMICA VERDE XS",p:15121},
+{s:"VTNGCN_530",n:"VASO TÉRMICO 530ML NEGRO CARPINTERO",p:9575},
+{s:"VTAZQU_530",n:"VASO TÉRMICO 530ML AZUL QUILLAY",p:9575},
+{s:"VTAZTOLA_350",n:"VASO TÉRMICO 350ML AZUL TORTUGA LAÚD",p:8062},
+{s:"VTNGAR_350",n:"VASO TÉRMICO 350ML NEGRO ARAUCARIA",p:8062},
+{s:"BTBLATK_690",n:"BOTELLA TÉRMICA 690ML BLANCO ATAKAMA",p:8566},
+{s:"BTNGATK_690",n:"BOTELLA TÉRMICA 690ML NEGRO ATAKAMA",p:8566},
+{s:"BTNGAM_690",n:"BOTELLA TÉRMICA 690ML NEGRO AMANITA MUSCARIA",p:10079},
+{s:"BTAZBJ_690",n:"BOTELLA TÉRMICA 690ML AZUL BALLENA JOROBADA",p:10079},
+{s:"BTAZMP_960",n:"BOTELLA TÉRMICA 960ML AZUL MARTÍN PESCADOR",p:14113},
+{s:"BTNGPU_960",n:"BOTELLA TÉRMICA 960ML NEGRO PUMA",p:14113},
+{s:"PETNG_150",n:"PETACA 150ML NEGRO PUMA",p:8566},
+{s:"SETCAFNG_350",n:"SET CAFETERA + 2 VASOS NEGRO CÓNDOR ANDINO",p:30247},
+{s:"TENGAR_1.3L",n:"TERMO 1.3LT NEGRO ARAUCARIA",p:18650},
+{s:"SVANGFA_480",n:"SET 4 VASOS ACERO 480ML FAUNA CHILENA",p:17642},
+{s:"SVNGAV_480",n:"SET 4 VASOS ACERO 480ML AVES CHILENAS",p:17642},
+{s:"SETST_AVES",n:"SET DE STICKERS AVES",p:1513},
+{s:"SETST_FAUNA",n:"SET DE STICKERS FAUNA",p:1513},
+{s:"SETST_FF",n:"SET DE STICKERS FLORA Y FUNGI",p:1513},
+{s:"PFUTAZMN_3637",n:"PANTUFLA FUTALEUFÚ FLEX AZUL MARINO 36-37",p:13608},
+{s:"PFUTAZMN_3839",n:"PANTUFLA FUTALEUFÚ FLEX AZUL MARINO 38-39",p:13608},
+{s:"PFUTAZMN_4041",n:"PANTUFLA FUTALEUFÚ FLEX AZUL MARINO 40-41",p:13608},
+{s:"PFUTBEFPN_3637",n:"PANTUFLA FUTALEUFÚ FLEX BEIGE FLORES 36-37",p:13608},
+{s:"PFUTBEFPN_3839",n:"PANTUFLA FUTALEUFÚ FLEX BEIGE FLORES 38-39",p:13608},
+{s:"PFUTBURN_3637",n:"PANTUFLA FUTALEUFÚ FLEX BURDEO 36-37",p:13608},
+{s:"PFUTCAFN_3637",n:"PANTUFLA FUTALEUFÚ FLEX CAFÉ 36-37",p:13608},
+{s:"PFUTCAFN_3839",n:"PANTUFLA FUTALEUFÚ FLEX CAFÉ 38-39",p:13608},
+{s:"PFUTCELN_3637",n:"PANTUFLA FUTALEUFÚ FLEX AZUL PETRÓLEO 36-37",p:13608},
+{s:"PFUTNGRCN_3637",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 36-37",p:13608},
+{s:"PFUTNGRCN_3839",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 38-39",p:13608},
+{s:"PFUTNGRCN_4041",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 40-41",p:13608},
+{s:"PFUTNGRCN_4243",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 42-43",p:13608},
+{s:"PFUTNGRN_3637",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 36-37",p:13608},
+{s:"PFUTNGRN_3839",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 38-39",p:13608},
+{s:"PFUTNGRN_4041",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 40-41",p:13608},
+{s:"PFUTNGRN_4243",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 42-43",p:13608},
+{s:"PFUTVRMN_3637",n:"PANTUFLA FUTALEUFÚ FLEX VERDE MUSGO 36-37",p:13608},
+{s:"PFUTVRMN_3839",n:"PANTUFLA FUTALEUFÚ FLEX VERDE MUSGO 38-39",p:13608},
+{s:"PNAVAZMN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX AZUL MARINO 36-37",p:17642},
+{s:"PNAVAZMN_3839",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX AZUL MARINO 38-39",p:17642},
+{s:"PNAVBEFPN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX BEIGE FLORES 36-37",p:17642},
+{s:"PNAVBURN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX BURDEO 36-37",p:17642},
+{s:"PNAVCAFN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX CAFÉ 36-37",p:17642},
+{s:"PNAVNGRN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX NEGRO/GRIS 36-37",p:17642},
+{s:"PNAVNGRN_3839",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX NEGRO/GRIS 38-39",p:17642},
+{s:"PNAVNGRN_4041",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX NEGRO/GRIS 40-41",p:17642},
+{s:"PNAVVRMN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX VERDE MUSGO 36-37",p:17642},
+{s:"PTORNGR_3637",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 36-37",p:11087},
+{s:"PTORNGR_3839",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 38-39",p:11087},
+{s:"PTORNGR_4041",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 40-41",p:11087},
+{s:"PTORNGR_4243",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 42-43",p:11087},
+{s:"PCOCNGRN_3637",n:"PANTUFLA COCHRANE FLEX NEGRO 36-37",p:13608},
+{s:"PCOCNGRN_3839",n:"PANTUFLA COCHRANE FLEX NEGRO 38-39",p:13608},
+{s:"PCOCNGRN_4041",n:"PANTUFLA COCHRANE FLEX NEGRO 40-41",p:13608},
+{s:"PAYSNGR_3637",n:"PANTUFLA AYSÉN NEGRO 36-37",p:16634},
+{s:"PAYSNGR_3839",n:"PANTUFLA AYSÉN NEGRO 38-39",p:16634},
+{s:"PAYSNGR_4041",n:"PANTUFLA AYSÉN NEGRO 40-41",p:16634},
+{s:"PAYSVR_3839",n:"PANTUFLA AYSÉN VERDE 38-39",p:16634},
+{s:"PAYSVR_4041",n:"PANTUFLA AYSÉN VERDE 40-41",p:16634},
+{s:"PNAVAMMS3637",n:"PANTUFLA NAVARINO AMARILLO MOSTAZA 36-37",p:17642},
+{s:"PNAVBEGAP3637",n:"PANTUFLA NAVARINO BEIGE ANIMAL PRINT 36-37",p:17642},
+{s:"PNAVNGR4041",n:"PANTUFLA NAVARINO NEGRO 40-41",p:17642},
+{s:"SCHCAF_40",n:"SANDALIA OUTDOOR CHUNGARÁ CAFÉ 40",p:18650},
+{s:"SCHCAF_41",n:"SANDALIA OUTDOOR CHUNGARÁ CAFÉ 41",p:18650},
+{s:"SCHCAF_42",n:"SANDALIA OUTDOOR CHUNGARÁ CAFÉ 42",p:18650},
+{s:"SCHNG_43",n:"SANDALIA OUTDOOR CHUNGARÁ NEGRO 43",p:18650},
+{s:"SCHVR_41",n:"SANDALIA OUTDOOR CHUNGARÁ VERDE 41",p:18650},
+{s:"BAPROAZ",n:"BANANO PLEGABLE PROVINCIA AZUL 2LT",p:7558},
+{s:"BAPROGG",n:"BANANO PLEGABLE PROVINCIA GRIS 2LT",p:7558},
+{s:"MPOCHAZ_16LT",n:"MOCHILA PLEGABLE POCHOCO CELESTE 16LT",p:10583},
+{s:"MPOCHGG_16LT",n:"MOCHILA PLEGABLE POCHOCO NEGRO 16LT",p:10583},
+{s:"MCOCHNGR_25LT",n:"MOCHILA COCHAMO NEGRO 25LT",p:32768},
+{s:"MPSMANQNG_28LT",n:"MOCHILA PLEGABLE SECA MANQUEHUE NEGRO 28LT",p:25205},
+{s:"MVSNNG_40LT",n:"MOCHILA DE VIAJE SIERRA NEVADA NEGRO 40LT",p:35289},
+{s:"BRT7NG_55LT",n:"BOLSO DUFFLE RUTA 7 NEGRO 55LT",p:30247},
+{s:"BRT7NG_80LT",n:"BOLSO DUFFLE RUTA 7 NEGRO 80LT",p:35289},
+{s:"MPBBLEOCEL",n:"MOCHILA PORTABEBÉ LEONERA CELESTE",p:110919},
+{s:"CMMEAM_SM",n:"CUBRE MOCHILAS MELIMOYU NARANJA S/M",p:5037},
+{s:"CMMEAM_ML",n:"CUBRE MOCHILAS MELIMOYU NARANJA M/L",p:5541},
+{s:"SPCLASGRBG",n:"SILLA PLEGABLE CAMPING LASCAR GRIS/BEIGE",p:18650},
+{s:"SPCLASGRNJ",n:"SILLA PLEGABLE CAMPING LASCAR GRIS/NARANJO",p:18650},
+{s:"SCLLAGRAZ_XL",n:"SILLA DE CAMPING LLAIMA GRIS/AZUL XL",p:21676},
+{s:"SCLLAGRNJ_XL",n:"SILLA DE CAMPING LLAIMA GRIS/NARANJO XL",p:21676},
+{s:"SCNICH_GRAMA",n:"SILLA CAMPING NIÑOS CHAITÉN GRIS/AMARILLO",p:11087},
+{s:"HDSA_CEL",n:"HAMACA DOBLE SAUCE CELESTE 2P",p:18146},
+{s:"HSCOI_AMA",n:"HAMACA SINGLE COIHUE AMARILLO 1P",p:14113},
+{s:"CTOTVRGR_4P",n:"CARPA TOTORALILLO VERDE/GRIS 4P",p:75625},
+{s:"CTOTVRGR_8P",n:"CARPA TOTORALILLO VERDE/GRIS 8P",p:151255},
+{s:"COHULI1P_VR",n:"COLCHONETA INFLABLE HUERQUEHUE VERDE 1P",p:35289},
+{s:"CALCAM_NAR",n:"COLCHONETA AISLANTE LA CAMPANA GRIS 1P",p:20163},
+{s:"MCPCALBL_180",n:"MESA PLEGABLE CAMPING CALBUCO BLANCO 180CM",p:25205},
+{s:"TEPLCAL_VR",n:"TETERA PLEGABLE CALAFATE VERDE 1LT",p:11592},
+{s:"SETBLAV_VR",n:"SET 2 BOWLS + CUBIERTOS AVELLANA VERDE",p:13608},
+{s:"OPMQVR_2.5LT",n:"OLLA PLEGABLE MAQUI VERDE 2.5LT",p:21676},
+{s:"CRCPNG_1LT",n:"COCINILLA RÁPIDA CUERNOS DEL PAINE NEGRO 1LT",p:35289},
+{s:"LFALNG_195",n:"LINTERNA FRONTAL ALMA AZUL/NEGRO 195LUM",p:10079},
+{s:"LFPAVR_380",n:"LINTERNA FRONTAL PARANAL VERDE 380LUM",p:15121},
+{s:"FOUTOL_470",n:"FOCO OUTDOOR LED TOLOLO 470LUM",p:21676},
+{s:"FOUTOL_1600",n:"FOCO OUTDOOR LED TOLOLO 1600LUM",p:25205},
+{s:"LILEDCRSUR",n:"LINTERNA LED LINE BLANCO 300LUM",p:11592},
+{s:"TELQAZ_M",n:"TOALLA MICROFIBRA ELQUI AZUL M",p:4029},
+{s:"TELQGR_M",n:"TOALLA MICROFIBRA ELQUI GRIS M",p:4029},
+{s:"TELQVR_M",n:"TOALLA MICROFIBRA ELQUI VERDE M",p:4029},
+{s:"TELQAZ_XL",n:"TOALLA MICROFIBRA ELQUI AZUL XL",p:7558},
+{s:"TELQGR_XL",n:"TOALLA MICROFIBRA ELQUI GRIS XL",p:7558},
+{s:"TMAUAM_XL",n:"TOALLA MICROFIBRA ULTRA LIGERA MAULLIN AZUL MARINO XL",p:8062},
+{s:"TMAUGC_XL",n:"TOALLA MICROFIBRA ULTRA LIGERA MAULLIN GRIS XL",p:8062},
+{s:"MTNALVR_L",n:"MANTA TÉRMICA NALCA VERDE L",p:25205},
+{s:"BCPTOL_GRREC",n:"BASURERO CAMPING PLEGABLE TOLTÉN GRIS RECICLAJE",p:9575},
+{s:"dispatch_cost_lp",n:"Despacho RM",p:15000},
+{s:"Personalizacion",n:"Estampado / Personalización",p:3000}
+];
+
+let items=[];
+
+function fmt(n){return '$'+Math.round(n).toLocaleString('es-CL');}
+function updateLbl(){document.getElementById('cotLabel').textContent='Cotización N° '+(document.getElementById('cotNum').value||'—');}
+function showMsg(txt,type){const m=document.getElementById('smsg');m.textContent=txt;m.className='smsg '+(type==='ok'?'sok':'serr');}
+
+async function getNextCotNumber(){
+  try{
+    const res=await fetch(SHEETS_URL+'?action=lastNumber');
+    const data=await res.json();
+    if(data.status==='OK') return parseInt(data.last)+1;
+  }catch(e){}
+  return 461;
 }
 
-function calcDistribucion(modelName, total, colorPcts) {
-  return MODELOS_DATA[modelName].colores.map(c => {
-    const p = (Number(colorPcts[c.name]) || 0) / 100;
-    const totalColor = Math.round(total * p);
-    const filas = c.tallas.map(t => ({
-      talla: t.talla, curva: t.curva,
-      qty: Math.round(totalColor * t.curva),
-      sku: getSku(modelName, c.name, t.talla)
-    }));
-    const suma = filas.reduce((a,b)=>a+b.qty,0);
-    if (filas.length > 0) filas[filas.length-1].qty += totalColor - suma;
-    return { ...c, totalColor, filas, accent: getAccent(c.name) };
-  }).filter(c => c.totalColor > 0);
+// Buscador
+document.getElementById('searchInput').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  const dd=document.getElementById('dd');
+  const body=document.getElementById('ddBody');
+  if(!q){dd.style.display='none';return;}
+  const res=P.filter(p=>p.s.toLowerCase().includes(q)||p.n.toLowerCase().includes(q)).slice(0,12);
+  if(!res.length){dd.style.display='none';return;}
+  body.innerHTML=res.map(p=>`<div class="dd-row" onmousedown="addItem('${p.s}')"><span class="dd-sku">${p.s}</span><span class="dd-name">${p.n}</span><span class="dd-price">${fmt(p.p)}</span></div>`).join('');
+  dd.style.display='block';
+});
+document.getElementById('searchInput').addEventListener('blur',function(){
+  setTimeout(()=>{document.getElementById('dd').style.display='none';},150);
+});
+
+function addItem(sku){
+  const p=P.find(x=>x.s===sku);
+  if(!p)return;
+  const ex=items.find(i=>i.s===sku);
+  if(ex)ex.q++;else items.push({s:p.s,n:p.n,p:p.p,q:1});
+  document.getElementById('searchInput').value='';
+  document.getElementById('dd').style.display='none';
+  renderTable();recalc();
 }
 
-function initColorPcts(modelName) {
-  const pcts = {};
-  MODELOS_DATA[modelName].colores.forEach(c => { pcts[c.name] = c.pct; });
-  return pcts;
+function renderTable(){
+  const empty=document.getElementById('emptyState');
+  const tbl=document.getElementById('tbl');
+  if(!items.length){empty.style.display='block';tbl.style.display='none';return;}
+  empty.style.display='none';tbl.style.display='table';
+  document.getElementById('tblBody').innerHTML=items.map((it,i)=>`
+    <tr>
+      <td style="font-size:11px;color:#999;font-family:monospace">${it.s}</td>
+      <td>${it.n}</td>
+      <td class="tc"><input type="number" class="qinput" min="1" value="${it.q}" oninput="upQty(${i},this.value)"></td>
+      <td class="tr"><input type="number" class="qinput" style="width:90px;text-align:right" min="0" value="${it.p}" oninput="upPrice(${i},this.value)"></td>
+      <td class="tr">${fmt(it.p*it.q)}</td>
+      <td class="tc"><button class="bdel" onclick="delItem(${i})">✕</button></td>
+    </tr>`).join('');
 }
 
-function downloadExcel(rows, filename) {
-  try {
-    const wsData = [["SKU","CANTIDAD"], ...rows.map(r=>[r.sku, r.qty])];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws["!cols"] = [{wch:28},{wch:12}];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Distribución");
-    XLSX.writeFile(wb, filename + ".xlsx");
-  } catch(e) {
-    alert("Error al generar Excel: " + e.message);
+function upQty(i,v){items[i].q=Math.max(1,parseInt(v)||1);renderTable();recalc();}
+function upPrice(i,v){items[i].p=Math.max(0,parseInt(v)||0);recalc();}
+function delItem(i){items.splice(i,1);renderTable();recalc();}
+
+function recalc(){
+  const disc=parseFloat(document.getElementById('discount').value)||0;
+  const sub=items.reduce((s,it)=>s+it.p*it.q,0);
+  const da=sub*(disc/100);
+  const net=sub-da;
+  const iva=net*0.19;
+  document.getElementById('tSub').textContent=fmt(sub);
+  document.getElementById('tDiscLbl').textContent='Descuento ('+disc+'%)';
+  document.getElementById('tDisc').textContent=disc>0?'-'+fmt(da):'-$0';
+  document.getElementById('tNet').textContent=fmt(net);
+  document.getElementById('tIva').textContent=fmt(iva);
+  document.getElementById('tTotal').textContent=fmt(net+iva);
+}
+
+async function clearAll(){
+  if(items.length&&!confirm('¿Limpiar cotización?'))return;
+  items=[];
+  ['empresa','rut','contacto'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('discount').value=0;
+  window.history.replaceState({},'',window.location.pathname);
+  const next=await getNextCotNumber();
+  document.getElementById('cotNum').value=next;
+  updateLbl();renderTable();recalc();
+  const m=document.getElementById('smsg');m.className='smsg';m.textContent='';
+}
+
+function saveSheets(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  const disc=parseFloat(document.getElementById('discount').value)||0;
+  const sub=items.reduce((s,it)=>s+it.p*it.q,0);
+  const net=sub*(1-disc/100);
+  const total=Math.round(net*1.19);
+  const cotN=document.getElementById('cotNum').value;
+  const penUrl='https://codepen.io/Ignacio-Aguilera-the-sans/pen/YPGrZWM?cot='+cotN;
+  window.history.replaceState({},'','?cot='+cotN);
+  const row={
+    cotizacion:cotN,
+    fecha:document.getElementById('fecha').value||new Date().toLocaleDateString('es-CL'),
+    empresa:document.getElementById('empresa').value||'—',
+    rut:document.getElementById('rut').value||'—',
+    contacto:document.getElementById('contacto').value||'—',
+    descuento:disc,
+    total:total,
+    link:penUrl
+  };
+  const params=new URLSearchParams(row);
+  const img=new Image();
+  img.src=SHEETS_URL+'?'+params.toString();
+  setTimeout(()=>showMsg('✓ Guardado. Link: '+penUrl,'ok'),1500);
+}
+
+async function loadFromUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const cot=params.get('cot');
+  if(!cot)return false;
+  const local=localStorage.getItem('cot_'+cot);
+  if(local){
+    try{
+      const data=JSON.parse(local);
+      document.getElementById('cotNum').value=data.cotizacion;
+      document.getElementById('fecha').value=data.fecha;
+      document.getElementById('empresa').value=data.empresa;
+      document.getElementById('rut').value=data.rut||'';
+      document.getElementById('contacto').value=data.contacto||'';
+      document.getElementById('discount').value=data.descuento||0;
+      items=JSON.parse(data.productos||'[]');
+      updateLbl();renderTable();recalc();
+      showMsg('Cotización N° '+cot+' cargada.','ok');
+      return true;
+    }catch(e){}
   }
+  try{
+    const res=await fetch(SHEETS_URL+'?action=load&cotizacion='+cot);
+    const data=await res.json();
+    if(data.status==='OK'){
+      document.getElementById('cotNum').value=data.cotizacion;
+      document.getElementById('fecha').value=data.fecha;
+      document.getElementById('empresa').value=data.empresa;
+      document.getElementById('rut').value=data.rut||'';
+      document.getElementById('contacto').value=data.contacto||'';
+      document.getElementById('discount').value=data.descuento||0;
+      updateLbl();renderTable();recalc();
+      showMsg('Cotización N° '+cot+' cargada.','ok');
+      return true;
+    }
+  }catch(e){}
+  return false;
 }
 
-function buildRows(distribucion) {
-  return distribucion.flatMap(c =>
-    c.filas.filter(f => f.qty > 0 && f.sku).map(f => ({ sku: f.sku, qty: f.qty }))
-  );
+async function makePDF(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'letter'});
+    const W=215.9,M=18;
+    // Logo desde Imgur
+    const logoImg=new Image();
+    logoImg.crossOrigin='anonymous';
+    logoImg.src='https://i.imgur.com/26BHPj5.png';
+    await new Promise(r=>{logoImg.onload=r;logoImg.onerror=r;});
+    if(logoImg.complete&&logoImg.naturalWidth>0){
+      const c=document.createElement('canvas');
+      c.width=logoImg.naturalWidth;c.height=logoImg.naturalHeight;
+      c.getContext('2d').drawImage(logoImg,0,0);
+      doc.addImage(c.toDataURL('image/png'),'PNG',M,8,65,16);
+    }
+    doc.setDrawColor(200,200,200);doc.setLineWidth(0.3);
+    doc.line(M,28,W-M,28);
+    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(26,26,26);
+    const cotN=document.getElementById('cotNum').value||'—';
+    doc.text('COTIZACIÓN N° '+cotN,W/2,38,{align:'center'});
+    doc.line(M,42,W-M,42);
+    const fecha=document.getElementById('fecha').value||new Date().toLocaleDateString('es-CL');
+    [['Fecha',fecha],['Empresa',document.getElementById('empresa').value||'—'],['RUT',document.getElementById('rut').value||'—'],['Contacto',document.getElementById('contacto').value||'—']].forEach((f,i)=>{
+      const y=50+i*7;
+      doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text(f[0],M,y);
+      doc.setTextColor(26,26,26);doc.text(f[1],56,y);
+    });
+    doc.line(M,80,W-M,80);
+    const disc=parseFloat(document.getElementById('discount').value)||0;
+    doc.autoTable({
+      startY:84,
+      head:[['Código','Descripción','Cantidad','Precio Neto desc.','Total Neto']],
+      body:items.map(it=>[it.s,it.n.length>46?it.n.substring(0,44)+'…':it.n,String(it.q),fmt(it.p),fmt(it.p*it.q)]),
+      margin:{left:M,right:M},
+      styles:{fontSize:8,cellPadding:2.5,textColor:[26,26,26]},
+      headStyles:{fillColor:[26,26,26],textColor:[255,255,255],fontStyle:'bold',fontSize:8},
+      columnStyles:{0:{cellWidth:30},1:{cellWidth:82},2:{cellWidth:16,halign:'center'},3:{cellWidth:30,halign:'right'},4:{cellWidth:30,halign:'right'}},
+      alternateRowStyles:{fillColor:[249,249,249]}
+    });
+    const fy=doc.lastAutoTable.finalY+8;
+    const sub=items.reduce((s,it)=>s+it.p*it.q,0);
+    const da=sub*(disc/100);
+    const net=sub-da;
+    const iva=net*0.19;
+    const tx=W-M;
+    const rows=disc>0?[['Subtotal neto',fmt(sub)],['Descuento ('+disc+'%)','-'+fmt(da)],['Valor neto',fmt(net)],['IVA 19%',fmt(iva)]]:[['Valor neto',fmt(net)],['IVA 19%',fmt(iva)]];
+    rows.forEach((r,i)=>{
+      const y=fy+i*7;
+      doc.setFontSize(9);doc.setFont('helvetica','normal');
+      doc.setTextColor(100,100,100);doc.text(r[0],tx-55,y);
+      if(r[0].startsWith('Desc'))doc.setTextColor(163,45,45);else doc.setTextColor(26,26,26);
+      doc.text(r[1],tx,y,{align:'right'});
+    });
+    const ly=fy+rows.length*7;
+    doc.setDrawColor(200,200,200);doc.line(tx-58,ly-2,tx,ly-2);
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(26,26,26);
+    doc.text('Total',tx-55,ly+4);doc.text(fmt(net+iva),tx,ly+4,{align:'right'});
+    const footY=Math.max(ly+18,230);
+    doc.setLineWidth(0.3);doc.line(M,footY,W-M,footY);
+    doc.setFontSize(8);doc.setFont('helvetica','normal');
+    [['Razón Social','ATAKAMA OUTDOOR SPA'],['RUT','76.475.772-6'],['Dirección','Tabancura 1482, Vitacura'],['Teléfono','56 9 9073 2022'],['Mail','hola@atakamaoutdoor.cl'],['Página Web','www.atakamaoutdoor.cl'],['Banco','Banco de Chile'],['Cuenta Corriente','8001210508']].forEach((r,i)=>{
+      const y=footY+6+i*5;
+      doc.setTextColor(110,110,110);doc.text(r[0],M,y);
+      doc.setTextColor(26,26,26);doc.text(r[1],56,y);
+    });
+    doc.save('Cotizacion_Atakama_'+cotN+'.pdf');
+    showMsg('PDF descargado correctamente.','ok');
+  }catch(e){showMsg('Error: '+e.message,'err');}
 }
 
-const SumBadge = ({sum}) => (
-  <span style={{fontSize:11,fontWeight:700,color:Math.abs(sum-100)<0.5?"#4ade80":"#f87171",marginLeft:8}}>
-    {Number(sum).toFixed(0)}% {Math.abs(sum-100)<0.5?"✓":"⚠"}
-  </span>
-);
-
-const DlBtn = ({onClick}) => (
-  <button onClick={onClick}
-    style={{display:"flex",alignItems:"center",gap:6,background:"#14532d",border:"1px solid #16a34a",
-      borderRadius:7,padding:"7px 14px",color:"#4ade80",fontSize:12,fontWeight:600,cursor:"pointer"}}>
-    ⬇ Descargar Excel
-  </button>
-);
-
-function TabIndividual() {
-  const [modelo, setModelo] = useState("FUTALEUFÚ ADULT");
-  const [total, setTotal] = useState(28000);
-  const [temporada, setTemporada] = useState("2026");
-  const [expandido, setExpandido] = useState(null);
-  const [pcts, setPcts] = useState(() => {
-    const o={}; MODEL_NAMES.forEach(m=>{o[m]=initColorPcts(m);}); return o;
-  });
-  const currentPcts = pcts[modelo];
-  const sumPct = Object.values(currentPcts).reduce((a,b)=>a+(Number(b)||0),0);
-  const distribucion = useMemo(()=>calcDistribucion(modelo,total,currentPcts),[modelo,total,currentPcts]);
-  const grandTotal = distribucion.reduce((a,c)=>a+c.totalColor,0);
-  const setPct = (cn,v) => setPcts(p=>({...p,[modelo]:{...p[modelo],[cn]:v}}));
-  const handleDownload = () => downloadExcel(buildRows(distribucion), `${modelo}_${temporada}`);
-
-  return (
-    <div>
-      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:12,marginBottom:18}}>
-        {[["Modelo"],["Temporada","text"],["Cantidad Total","number"]].map(([label,type],i)=>(
-          <div key={label}>
-            <div style={{fontSize:10,color:"#94a3b8",marginBottom:5,textTransform:"uppercase",letterSpacing:1}}>{label}</div>
-            {i===0
-              ? <select value={modelo} onChange={e=>{setModelo(e.target.value);setExpandido(null);}}
-                  style={{background:"#1e2130",border:"1px solid #2d3350",borderRadius:7,padding:"8px 12px",color:"#f1f5f9",fontSize:13,outline:"none",width:"100%"}}>
-                  {MODEL_NAMES.map(m=><option key={m}>{m}</option>)}
-                </select>
-              : <input type={type} value={i===1?temporada:total} onChange={e=>i===1?setTemporada(e.target.value):setTotal(Number(e.target.value))}
-                  style={{background:"#1e2130",border:"1px solid #2d3350",borderRadius:7,padding:"8px 12px",color:"#f1f5f9",fontSize:13,outline:"none",width:"100%"}}/>
-            }
-          </div>
-        ))}
-      </div>
-
-      <div style={{background:"#161922",border:"1px solid #252b40",borderRadius:12,padding:"14px 16px",marginBottom:18}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-          <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2}}>% por Color — {modelo}</div>
-          <SumBadge sum={sumPct}/>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(165px,1fr))",gap:8}}>
-          {MODELOS_DATA[modelo].colores.map(c=>(
-            <div key={c.name} style={{display:"flex",alignItems:"center",gap:7,background:"#1e2130",borderRadius:7,padding:"7px 10px"}}>
-              <div style={{width:7,height:7,borderRadius:"50%",background:getAccent(c.name),flexShrink:0}}/>
-              <div style={{fontSize:11,color:"#cbd5e1",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
-              <input type="number" min="0" max="100" value={currentPcts[c.name]} onChange={e=>setPct(c.name,e.target.value)}
-                style={{width:44,background:"#0f1117",border:"1px solid #2d3350",borderRadius:5,padding:"3px 5px",color:"#f1f5f9",fontSize:12,outline:"none",textAlign:"right"}}/>
-              <span style={{fontSize:10,color:"#64748b"}}>%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{background:"linear-gradient(135deg,#1a1f35,#1e2540)",border:"1px solid #2d3a5e",borderRadius:12,
-        padding:"12px 18px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <div style={{fontSize:12,color:"#94a3b8"}}>{modelo} · {temporada}</div>
-          <div style={{fontSize:11,color:"#475569",marginTop:1}}>{distribucion.length} colores activos</div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:16}}>
-          <DlBtn onClick={handleDownload}/>
-          <div style={{textAlign:"right"}}>
-            <div style={{fontSize:10,color:"#6C9BF5",textTransform:"uppercase",letterSpacing:1}}>Total</div>
-            <div style={{fontSize:24,fontWeight:800,color:"#6C9BF5"}}>{grandTotal.toLocaleString()}</div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>Resumen por Color</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:10,marginBottom:24}}>
-        {distribucion.map((c,i)=>(
-          <div key={c.name} onClick={()=>setExpandido(expandido===i?null:i)}
-            style={{background:expandido===i?"#1a2035":"#161922",border:`1px solid ${expandido===i?c.accent:"#252b40"}`,borderRadius:10,padding:"12px 14px",cursor:"pointer",transition:"all .2s"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div>
-                <div style={{fontWeight:600,fontSize:12,color:"#f1f5f9"}}>{c.name}</div>
-                <div style={{fontSize:11,color:"#64748b",marginTop:1}}>{Number(currentPcts[c.name]||0).toFixed(0)}%</div>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontSize:17,fontWeight:700,color:c.accent}}>{c.totalColor.toLocaleString()}</div>
-                <div style={{fontSize:10,color:"#475569"}}>uds</div>
-              </div>
-            </div>
-            <div style={{marginTop:8,background:"#0f1117",borderRadius:3,height:4}}>
-              <div style={{width:`${Math.min(Number(currentPcts[c.name]||0),100)}%`,background:c.accent,height:4,borderRadius:3}}/>
-            </div>
-            {expandido===i && (
-              <div style={{marginTop:10,borderTop:"1px solid #252b40",paddingTop:8}}>
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
-                  <thead><tr>{["SKU","Talla","Uds"].map(h=><th key={h} style={{textAlign:h==="Uds"?"right":"left",fontSize:10,color:"#475569",paddingBottom:4,fontWeight:500}}>{h}</th>)}</tr></thead>
-                  <tbody>{c.filas.map(f=>(
-                    <tr key={f.talla}>
-                      <td style={{fontSize:10,color:"#64748b",paddingBottom:3}}>{f.sku||"—"}</td>
-                      <td style={{fontSize:11,color:"#cbd5e1",paddingBottom:3}}>{f.talla}</td>
-                      <td style={{fontSize:11,fontWeight:600,color:c.accent,textAlign:"right",paddingBottom:3}}>{f.qty.toLocaleString()}</td>
-                    </tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            )}
-            <div style={{fontSize:10,color:"#334155",marginTop:5,textAlign:"center"}}>{expandido===i?"▲ cerrar":"▼ ver detalle"}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{background:"#161922",border:"1px solid #252b40",borderRadius:12,overflow:"auto"}}>
-        <div style={{padding:"10px 14px",background:"#1e2130",borderBottom:"1px solid #252b40"}}>
-          <div style={{fontSize:10,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>Detalle Completo</div>
-        </div>
-        <table style={{width:"100%",borderCollapse:"collapse",minWidth:500}}>
-          <thead>
-            <tr style={{background:"#1e2130"}}>
-              {["Modelo","Color","SKU","Talla","Q Final"].map(h=>(
-                <th key={h} style={{padding:"9px 12px",textAlign:h==="Q Final"?"right":"left",fontSize:10,color:"#64748b",fontWeight:600,textTransform:"uppercase",letterSpacing:1,borderBottom:"1px solid #252b40"}}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {distribucion.flatMap((c,ci)=>c.filas.map((f,fi)=>(
-              <tr key={`${ci}-${fi}`} style={{borderBottom:"1px solid #1a1f2e",background:fi%2===0?"transparent":"#13161f"}}>
-                <td style={{padding:"7px 12px",fontSize:10,color:"#64748b"}}>{fi===0?modelo:""}</td>
-                <td style={{padding:"7px 12px",fontSize:11,fontWeight:600,color:c.accent}}>{fi===0?c.name:""}</td>
-                <td style={{padding:"7px 12px",fontSize:10,color:"#64748b",fontFamily:"monospace"}}>{f.sku||"—"}</td>
-                <td style={{padding:"7px 12px",fontSize:11,color:"#cbd5e1"}}>{f.talla}</td>
-                <td style={{padding:"7px 12px",fontSize:11,fontWeight:700,color:"#f1f5f9",textAlign:"right"}}>{f.qty.toLocaleString()}</td>
-              </tr>
-            )))}
-            <tr style={{background:"#1e2130",borderTop:"2px solid #2d3a5e"}}>
-              <td colSpan={4} style={{padding:"10px 12px",fontSize:11,fontWeight:700,color:"#94a3b8"}}>TOTAL</td>
-              <td style={{padding:"10px 12px",fontSize:14,fontWeight:800,color:"#6C9BF5",textAlign:"right"}}>{grandTotal.toLocaleString()}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function TabMulti() {
-  const [temporada, setTemporada] = useState("2026");
-  const [totalGlobal, setTotalGlobal] = useState(10000);
-  const [modelos, setModelos] = useState([
-    {id:1,nombre:"FUTALEUFÚ ADULT",pctModelo:70},
-    {id:2,nombre:"NAVARINO",pctModelo:30},
-  ]);
-  const [colorPcts, setColorPcts] = useState(()=>{
-    const o={}; MODEL_NAMES.forEach(m=>{o[m]=initColorPcts(m);}); return o;
-  });
-  const [expandido, setExpandido] = useState(null);
-  const sumModelos = modelos.reduce((a,m)=>a+(Number(m.pctModelo)||0),0);
-
-  const addModelo = () => {
-    const disp = MODEL_NAMES.filter(n=>!modelos.find(m=>m.nombre===n));
-    if (!disp.length) return;
-    setModelos(p=>[...p,{id:Date.now(),nombre:disp[0],pctModelo:0}]);
-  };
-  const removeModelo = id => setModelos(p=>p.filter(m=>m.id!==id));
-  const updateModelo = (id,field,val) => setModelos(p=>p.map(m=>m.id===id?{...m,[field]:val}:m));
-  const setColorPct = (mn,cn,v) => setColorPcts(p=>({...p,[mn]:{...p[mn],[cn]:v}}));
-  const toggleExp = key => setExpandido(p=>p===key?null:key);
-
-  const distribucionPorModelo = useMemo(()=>modelos.map(m=>{
-    const totalM = Math.round(totalGlobal*(Number(m.pctModelo)||0)/100);
-    const dist = calcDistribucion(m.nombre,totalM,colorPcts[m.nombre]);
-    return {...m, totalUnidades:dist.reduce((a,c)=>a+c.totalColor,0), dist};
-  }),[modelos,totalGlobal,colorPcts]);
-
-  const grandTotal = distribucionPorModelo.reduce((a,m)=>a+m.totalUnidades,0);
-  const handleDownloadAll = () => {
-    const rows = distribucionPorModelo.flatMap(m => buildRows(m.dist));
-    downloadExcel(rows, `pedido_multimodelo_${temporada}`);
-  };
-
-  return (
-    <div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:18}}>
-        {[["Temporada",temporada,setTemporada,"text"],["Cantidad Total",totalGlobal,v=>setTotalGlobal(Number(v)),"number"]].map(([l,v,s,t])=>(
-          <div key={l}>
-            <div style={{fontSize:10,color:"#94a3b8",marginBottom:5,textTransform:"uppercase",letterSpacing:1}}>{l}</div>
-            <input type={t} value={v} onChange={e=>s(e.target.value)}
-              style={{background:"#1e2130",border:"1px solid #2d3350",borderRadius:7,padding:"8px 12px",color:"#f1f5f9",fontSize:13,outline:"none",width:"100%"}}/>
-          </div>
-        ))}
-      </div>
-
-      <div style={{background:"#161922",border:"1px solid #252b40",borderRadius:12,padding:"14px 16px",marginBottom:18}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-          <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2}}>Modelos del Pedido</div>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <SumBadge sum={sumModelos}/>
-            {modelos.length < MODEL_NAMES.length &&
-              <button onClick={addModelo} style={{background:"#1e2540",border:"1px solid #2d3a5e",borderRadius:6,padding:"5px 12px",color:"#6C9BF5",fontSize:11,cursor:"pointer"}}>+ Agregar modelo</button>}
-          </div>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {modelos.map((m,mi)=>{
-            const disp = MODEL_NAMES.filter(n=>n===m.nombre||!modelos.find(x=>x.id!==m.id&&x.nombre===n));
-            const sumColor = Object.values(colorPcts[m.nombre]).reduce((a,b)=>a+(Number(b)||0),0);
-            const isExp = expandido===`m-${m.id}`;
-            const totalM = Math.round(totalGlobal*(Number(m.pctModelo)||0)/100);
-            return (
-              <div key={m.id} style={{background:"#1a1f2e",border:`1px solid ${isExp?MODEL_COLORS[mi%4]:"#252b40"}`,borderRadius:10}}>
-                <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px"}}>
-                  <div style={{width:10,height:10,borderRadius:2,background:MODEL_COLORS[mi%4],flexShrink:0}}/>
-                  <select value={m.nombre} onChange={e=>updateModelo(m.id,"nombre",e.target.value)}
-                    style={{background:"#0f1117",border:"1px solid #2d3350",borderRadius:6,padding:"5px 8px",color:"#f1f5f9",fontSize:12,outline:"none",flex:1}}>
-                    {disp.map(n=><option key={n}>{n}</option>)}
-                  </select>
-                  <div style={{display:"flex",alignItems:"center",gap:4}}>
-                    <input type="number" min="0" max="100" value={m.pctModelo} onChange={e=>updateModelo(m.id,"pctModelo",e.target.value)}
-                      style={{width:52,background:"#0f1117",border:"1px solid #2d3350",borderRadius:5,padding:"5px 6px",color:"#f1f5f9",fontSize:12,outline:"none",textAlign:"right"}}/>
-                    <span style={{fontSize:11,color:"#64748b"}}>%</span>
-                    <span style={{fontSize:11,color:"#475569",marginLeft:4}}>→ {totalM.toLocaleString()} uds</span>
-                  </div>
-                  <button onClick={()=>toggleExp(`m-${m.id}`)} style={{background:"none",border:"none",color:"#6C9BF5",cursor:"pointer",fontSize:12,padding:"0 4px"}}>{isExp?"▲":"▼"}</button>
-                  {modelos.length>1 && <button onClick={()=>removeModelo(m.id)} style={{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:14,padding:"0 2px"}}>×</button>}
-                </div>
-                {isExp && (
-                  <div style={{borderTop:"1px solid #252b40",padding:"12px 14px"}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                      <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>% por Color</div>
-                      <SumBadge sum={sumColor}/>
-                    </div>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:6}}>
-                      {MODELOS_DATA[m.nombre].colores.map(c=>(
-                        <div key={c.name} style={{display:"flex",alignItems:"center",gap:6,background:"#161922",borderRadius:6,padding:"6px 8px"}}>
-                          <div style={{width:6,height:6,borderRadius:"50%",background:getAccent(c.name),flexShrink:0}}/>
-                          <div style={{fontSize:11,color:"#cbd5e1",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
-                          <input type="number" min="0" max="100" value={colorPcts[m.nombre][c.name]} onChange={e=>setColorPct(m.nombre,c.name,e.target.value)}
-                            style={{width:40,background:"#0f1117",border:"1px solid #2d3350",borderRadius:4,padding:"3px 4px",color:"#f1f5f9",fontSize:11,outline:"none",textAlign:"right"}}/>
-                          <span style={{fontSize:10,color:"#64748b"}}>%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div style={{background:"linear-gradient(135deg,#1a1f35,#1e2540)",border:"1px solid #2d3a5e",borderRadius:12,
-        padding:"12px 18px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <div style={{fontSize:12,color:"#94a3b8"}}>Pedido Multi-Modelo · {temporada}</div>
-          <div style={{fontSize:11,color:"#475569",marginTop:1}}>{modelos.length} modelos</div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:16}}>
-          <DlBtn onClick={handleDownloadAll}/>
-          <div style={{textAlign:"right"}}>
-            <div style={{fontSize:10,color:"#6C9BF5",textTransform:"uppercase",letterSpacing:1}}>Total</div>
-            <div style={{fontSize:24,fontWeight:800,color:"#6C9BF5"}}>{grandTotal.toLocaleString()}</div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>Resumen por Modelo</div>
-      <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
-        {distribucionPorModelo.map((m,mi)=>{
-          const isExp = expandido===`res-${m.id}`;
-          const mc = MODEL_COLORS[mi%4];
-          return (
-            <div key={m.id} style={{background:"#161922",border:`1px solid ${isExp?mc:"#252b40"}`,borderRadius:12}}>
-              <div onClick={()=>toggleExp(`res-${m.id}`)}
-                style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",cursor:"pointer"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:10,height:10,borderRadius:2,background:mc}}/>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:14,color:"#f1f5f9"}}>{m.nombre}</div>
-                    <div style={{fontSize:11,color:"#64748b",marginTop:1}}>{m.pctModelo}% · {m.dist.length} colores</div>
-                  </div>
-                </div>
-                <div style={{display:"flex",alignItems:"center",gap:16}}>
-                  <div style={{textAlign:"right"}}>
-                    <div style={{fontSize:20,fontWeight:800,color:mc}}>{m.totalUnidades.toLocaleString()}</div>
-                    <div style={{fontSize:10,color:"#475569"}}>uds</div>
-                  </div>
-                  <span style={{color:mc,fontSize:13}}>{isExp?"▲":"▼"}</span>
-                </div>
-              </div>
-              <div style={{height:3,background:"#0f1117",margin:"0 16px"}}>
-                <div style={{width:`${Math.min(m.pctModelo,100)}%`,background:mc,height:3}}/>
-              </div>
-              {isExp && (
-                <div style={{padding:"14px 16px",borderTop:"1px solid #252b40",marginTop:4}}>
-                  <div style={{background:"#0f1117",borderRadius:8,overflow:"auto"}}>
-                    <table style={{width:"100%",borderCollapse:"collapse",minWidth:400}}>
-                      <thead>
-                        <tr>{["Color","SKU","Talla","Q Final"].map(h=>(
-                          <th key={h} style={{padding:"7px 10px",textAlign:h==="Q Final"?"right":"left",fontSize:9,color:"#475569",fontWeight:600,textTransform:"uppercase",borderBottom:"1px solid #1a1f2e"}}>{h}</th>
-                        ))}</tr>
-                      </thead>
-                      <tbody>
-                        {m.dist.flatMap((c,ci)=>c.filas.map((f,fi)=>(
-                          <tr key={`${ci}-${fi}`} style={{borderBottom:"1px solid #161922",background:fi%2===0?"transparent":"#13161f"}}>
-                            <td style={{padding:"5px 10px",fontSize:10,fontWeight:fi===0?600:400,color:fi===0?c.accent:"#334155"}}>{fi===0?c.name:""}</td>
-                            <td style={{padding:"5px 10px",fontSize:10,color:"#64748b",fontFamily:"monospace"}}>{f.sku||"—"}</td>
-                            <td style={{padding:"5px 10px",fontSize:10,color:"#cbd5e1"}}>{f.talla}</td>
-                            <td style={{padding:"5px 10px",fontSize:10,fontWeight:700,color:"#f1f5f9",textAlign:"right"}}>{f.qty.toLocaleString()}</td>
-                          </tr>
-                        )))}
-                        <tr style={{background:"#1a1f2e",borderTop:"1px solid #252b40"}}>
-                          <td colSpan={3} style={{padding:"7px 10px",fontSize:10,fontWeight:700,color:"#94a3b8"}}>SUBTOTAL {m.nombre}</td>
-                          <td style={{padding:"7px 10px",fontSize:12,fontWeight:800,color:mc,textAlign:"right"}}>{m.totalUnidades.toLocaleString()}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div style={{fontSize:10,color:"#334155",textAlign:"center",paddingBottom:20}}>
-        Haz clic en cada modelo para expandir · Luego clic en cada color para ver distribución por talla
-      </div>
-    </div>
-  );
-}
-
-function App() {
-  const [tab, setTab] = useState("individual");
-  return (
-    <div style={{minHeight:"100vh",background:"#0f1117",color:"#e2e8f0",fontFamily:"'Segoe UI',sans-serif",padding:"20px 14px"}}>
-      <div style={{maxWidth:960,margin:"0 auto"}}>
-        <div style={{marginBottom:20}}>
-          <div style={{fontSize:10,letterSpacing:3,color:"#6C9BF5",textTransform:"uppercase",marginBottom:4}}>Distribución de Producción</div>
-          <h1 style={{margin:0,fontSize:21,fontWeight:700,color:"#f1f5f9"}}>Calculadora de Órdenes 2026</h1>
-        </div>
-        <div style={{display:"flex",gap:4,marginBottom:22,background:"#161922",borderRadius:10,padding:4,width:"fit-content"}}>
-          {[["individual","📦 Modelo Individual"],["multi","🗂 Pedido Multi-Modelo"]].map(([k,l])=>(
-            <button key={k} onClick={()=>setTab(k)}
-              style={{padding:"8px 18px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,
-                background:tab===k?"#1e2540":"transparent",color:tab===k?"#6C9BF5":"#64748b",transition:"all .2s"}}>
-              {l}
-            </button>
-          ))}
-        </div>
-        {tab==="individual" ? <TabIndividual/> : <TabMulti/>}
-      </div>
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+// Inicialización
+document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
+(async()=>{
+  const loaded=await loadFromUrl();
+  if(!loaded){
+    const next=await getNextCotNumber();
+    document.getElementById('cotNum').value=next;
+    updateLbl();
+  }
+  recalc();
+})();
 </script>
 </body>
 </html>
