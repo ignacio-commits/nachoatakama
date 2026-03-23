@@ -6,6 +6,7 @@
 <title>Cotizador Atakama Outdoor</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f4f4f4;color:#1a1a1a;font-size:14px}
@@ -120,6 +121,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
     </div>
     <div class="actions">
       <button class="btn" onclick="clearAll()">Nueva cotización</button>
+      <button class="btn" onclick="exportExcel()">Descargar Excel</button>
       <button class="btn" onclick="saveSheets()">Guardar en Sheets</button>
       <button class="btn btnp" onclick="makePDF()">Descargar PDF</button>
     </div>
@@ -435,7 +437,17 @@ async function clearAll(){
   const m=document.getElementById('smsg');m.className='smsg';m.textContent='';
 }
 
-function saveSheets(){
+function exportExcel(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  const rows=[['SKU','Cantidad','Precio Neto']];
+  items.forEach(it=>rows.push([it.s, it.q, it.p]));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:20},{wch:12},{wch:14}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Orden');
+  XLSX.writeFile(wb,'Orden_Atakama_'+document.getElementById('cotNum').value+'.xlsx');
+  showMsg('Excel descargado correctamente.','ok');
+}
   if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
   const disc=parseFloat(document.getElementById('discount').value)||0;
   const sub=items.reduce((s,it)=>s+it.p*it.q,0);
