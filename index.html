@@ -128,6 +128,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbwooW0heR5tHuksUMK4fJgBnds4lDUO5f5Cki-ZWQ2FRUg_Wb5fuoxtDfVdde_CCelk/exec';
 
@@ -365,7 +366,6 @@ async function getNextCotNumber(){
   return 461;
 }
 
-// Buscador
 document.getElementById('searchInput').addEventListener('input',function(){
   const q=this.value.toLowerCase().trim();
   const dd=document.getElementById('dd');
@@ -438,9 +438,9 @@ async function clearAll(){
 
 function exportExcel(){
   if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
-  if(typeof XLSX==='undefined'){showMsg('Excel aún cargando, intenta en unos segundos.','err');return;}
+  if(typeof XLSX==='undefined'){showMsg('Librería Excel cargando, intenta en unos segundos.','err');return;}
   const rows=[['SKU','Cantidad','Precio Neto']];
-  items.forEach(it=>rows.push([it.s, it.q, it.p]));
+  items.forEach(it=>rows.push([it.s,it.q,it.p]));
   const ws=XLSX.utils.aoa_to_sheet(rows);
   ws['!cols']=[{wch:20},{wch:12},{wch:14}];
   const wb=XLSX.utils.book_new();
@@ -449,10 +449,8 @@ function exportExcel(){
   showMsg('Excel descargado correctamente.','ok');
 }
 
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-</body>
-</html>  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+function saveSheets(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
   const disc=parseFloat(document.getElementById('discount').value)||0;
   const sub=items.reduce((s,it)=>s+it.p*it.q,0);
   const net=sub*(1-disc/100);
@@ -520,7 +518,6 @@ async function makePDF(){
     const {jsPDF}=window.jspdf;
     const doc=new jsPDF({unit:'mm',format:'letter'});
     const W=215.9,M=18;
-    // Logo desde Imgur
     const logoImg=new Image();
     logoImg.crossOrigin='anonymous';
     logoImg.src='https://i.imgur.com/26BHPj5.png';
@@ -586,7 +583,6 @@ async function makePDF(){
   }catch(e){showMsg('Error: '+e.message,'err');}
 }
 
-// Inicialización
 document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
 (async()=>{
   const loaded=await loadFromUrl();
