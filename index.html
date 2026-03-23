@@ -6,7 +6,6 @@
 <title>Cotizador Atakama Outdoor</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f4f4f4;color:#1a1a1a;font-size:14px}
@@ -439,6 +438,7 @@ async function clearAll(){
 
 function exportExcel(){
   if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  if(typeof XLSX==='undefined'){showMsg('Excel aún cargando, intenta en unos segundos.','err');return;}
   const rows=[['SKU','Cantidad','Precio Neto']];
   items.forEach(it=>rows.push([it.s, it.q, it.p]));
   const ws=XLSX.utils.aoa_to_sheet(rows);
@@ -448,7 +448,11 @@ function exportExcel(){
   XLSX.writeFile(wb,'Orden_Atakama_'+document.getElementById('cotNum').value+'.xlsx');
   showMsg('Excel descargado correctamente.','ok');
 }
-  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
   const disc=parseFloat(document.getElementById('discount').value)||0;
   const sub=items.reduce((s,it)=>s+it.p*it.q,0);
   const net=sub*(1-disc/100);
