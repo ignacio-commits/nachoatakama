@@ -36,6 +36,7 @@ th{font-size:11px;font-weight:600;color:#888;text-align:left;padding:8px 10px;bo
 td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-align:middle}
 .tr{text-align:right}.tc{text-align:center}
 .qinput{width:60px;text-align:center}
+.pinput{width:90px;text-align:right}
 .bdel{background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
 .bdel:hover{background:#fee;color:#c00}
 .disc-row{display:flex;align-items:center;gap:8px;margin-top:16px}
@@ -59,9 +60,11 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
 </style>
 </head>
 <body>
+
 <header>
   <img src="https://i.imgur.com/26BHPj5.png" style="height:40px;object-fit:contain">
 </header>
+
 <div class="app">
   <div class="card">
     <div class="hrow card-title">
@@ -78,6 +81,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
       <div class="field"><label>N° Cotización</label><input type="number" id="cotNum" min="1" value="" oninput="updateLbl()"></div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-title">Agregar productos</div>
     <div class="search-wrap">
@@ -94,6 +98,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
       <span>Columnas requeridas: SKU | Cantidad | Precio Neto</span>
     </div>
   </div>
+
   <div class="card">
     <div class="card-title">Detalle cotización</div>
     <div class="empty" id="emptyState">Agrega productos usando el buscador o carga masiva</div>
@@ -133,51 +138,504 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
     <div id="smsg" class="smsg"></div>
   </div>
 </div>
+
 <script>
-const SHEETS_URL='https://script.google.com/macros/s/AKfycbz0Ro8expiEsKgdRIQUyUVfa2mNetxodp1NwM4QeSIk2_K_4u1vHgJYv1KezfGAIyDH/exec';
+const SHEETS_URL='https://script.google.com/macros/s/AKfycbwooW0heR5tHuksUMK4fJgBnds4lDUO5f5Cki-ZWQ2FRUg_Wb5fuoxtDfVdde_CCelk/exec';
+
 const P=[
-{s:"BANLOALM_GR",n:"BANDANA LANA MERINO LOA GRIS",p:21000},
-{s:"BANLOALM_VR",n:"BANDANA LANA MERINO LOA VERDE",p:21000},
-{s:"BANPALPAL_CEL",n:"BANDANA COOLMAX PALENA CELESTE",p:8395},
-{s:"BANPALPAR_VR",n:"BANDANA COOLMAX PALENA VERDE",p:8395},
-{s:"BANPALPTC_NG",n:"BANDANA COOLMAX PALENA NEGRO",p:8395},
-{s:"BUSAAD_GR",n:"BUCKET ADULTO SALADO GRIS",p:10916},
-{s:"BUSAAD_VR",n:"BUCKET ADULTO SALADO VERDE",p:10916},
-{s:"BUSANI_AP",n:"BUCKET NIÑO SALADO AZUL",p:8395},
-{s:"BUSANI_VP",n:"BUCKET NIÑO SALADO VERDE",p:8395},
-{s:"JDJUNC_VER",n:"JOCKEY DEPORTIVO JUNCAL VERDE",p:16798},
-{s:"JFPDEN_GR",n:"JOCKEY DEPORTIVO ENCO NEGRO",p:18479},
-{s:"JFPDEN_VR",n:"JOCKEY FIVE PANEL DEPORTIVO ENCO VERDE",p:18479},
-{s:"JFPPUE_AZ",n:"JOCKEY FIVE PANEL PUELO AZUL",p:16798},
-{s:"JFPPUE_CAF",n:"JOCKEY FIVE PANEL PUELO CAFÉ/VERDE",p:16798},
-{s:"JFPREVAZ",n:"JOCKEY REVERSIBLE CHIPORRO ESPOLÓN AZUL",p:18479},
-{s:"JTRUCAU_CC",n:"JOCKEY TRUCKER CAUTÍN CAFÉ",p:15958},
-{s:"JTRUCAU_NG",n:"JOCKEY TRUCKER CAUTÍN NEGRO",p:15958},
-{s:"SOMLIRGRI_SM",n:"SOMBRERO LIRCAY GRIS S/M",p:21840},
-{s:"SOMLIRVR_SM",n:"SOMBRERO LIRCAY VERDE S/M",p:21840},
-{s:"CINTRALM_BE",n:"CINTILLO LANA MERINO TRANCURA BEIGE",p:18479},
-{s:"GBEACHO_CG",n:"GORRO BEANIE CHOAPA GRIS",p:12597},
-{s:"GBEACHO_NG",n:"GORRO BEANIE CHOAPA NEGRO",p:12597},
-{s:"GBEACHO_VR",n:"GORRO BEANIE CHOAPA VERDE",p:12597},
-{s:"GBEALIM_AM",n:"GORRO BEANIE LIMARÍ AMBAR",p:12597},
-{s:"GBEALIM_GR",n:"GORRO BEANIE LIMARÍ GRIS",p:12597},
-{s:"GBEALIM_VR",n:"GORRO BEANIE LIMARÍ VERDE",p:12597},
-{s:"GBEATRALM_BE",n:"GORRO BEANIE LANA MERINO TRANCURA BEIGE",p:18479},
-{s:"GBEATRALM_CAF",n:"GORRO BEANIE LANA MERINO TRANCURA CAFÉ",p:18479},
-{s:"CCOOLAZ_SM",n:"CALCETÍN DEPORTIVO COOLMAX CORCOVADO GRIS S/M",p:10916},
-{s:"CCOOLAZ_LXL",n:"CALCETÍN DEPORTIVO COOLMAX CORCOVADO GRIS L/XL",p:10916},
-{s:"CTCOLMALTO_SM",n:"CALCETÍN TREKKING LARGO LANA MERINO CONGUILLIO VERDE S/M",p:12597},
-{s:"CTCOLMALTO_LXL",n:"CALCETÍN TREKKING LARGO LANA MERINO CONGUILLIO VERDE L/XL",p:12597},
-{s:"CTJFLM_SM",n:"CALCETÍN TREKKING LANA MERINO JUAN FERNANDEZ S/M",p:12597},
-{s:"CTJFLM_LXL",n:"CALCETÍN TREKKING LANA MERINO JUAN FERNANDEZ L/XL",p:12597},
-{s:"CTDFLM_SM",n:"CALCETÍN TREKKING LANA MERINO DESIERTO FLOREADO S/M",p:12597},
-{s:"CTDFLM_LXL",n:"CALCETÍN TREKKING LANA MERINO DESIERTO FLOREADO L/XL",p:12597},
-{s:"CTQLMALTO_SM",n:"CALCETÍN TREKKING LARGO LANA MERINO QUEULAT S/M",p:12597},
-{s:"CTQLMALTO_LXL",n:"CALCETÍN TREKKING LARGO LANA MERINO QUEULAT L/XL",p:12597},
-{s:"CDELM_SM",n:"CALCETÍN DEPORTIVO LANA MERINO CORTO GRIS S/M",p:10916},
-{s:"CDELM_LXL",n:"CALCETÍN DEPORTIVO LANA MERINO CORTO GRIS L/XL",p:10916},
-{s:"GPCLMNGR_SM",n:"GUANTE PRIMERA CAPA LANA MERINO SERRANO NEGRO S/M",p:21000},
-{s:"GPCLMNGR_LXL",n:"GUANTE PRIMERA CAPA LANA MERINO SERRANO NEGRO L/XL",p:21000},
-{s:"GPCNGR_SM",n:"GUANTE PRIMERA CAPA QUECO NEGRO S/M",p:17639},
-{s:"GPCNGR_LXL",n:"GUANTE PRIMERA CAPA QUECO NEGRO L/XL",p:17639},
-{s:"PCTERHNG_S
+{s:"BANLOALM_GR",n:"BANDANA LANA MERINO LOA GRIS",p:12600},
+{s:"BANLOALM_VR",n:"BANDANA LANA MERINO LOA VERDE",p:12600},
+{s:"BANPALPAL_CEL",n:"BANDANA COOLMAX PALENA CELESTE",p:5037},
+{s:"BANPALPTC_NG",n:"BANDANA COOLMAX PALENA NEGRO",p:5037},
+{s:"BUSAAD_GR",n:"BUCKET ADULTO SALADO GRIS",p:6550},
+{s:"BUSAAD_VR",n:"BUCKET ADULTO SALADO VERDE",p:6550},
+{s:"BUSANI_AP",n:"BUCKET NIÑO SALADO AZUL",p:5037},
+{s:"BUSANI_VP",n:"BUCKET NIÑO SALADO VERDE",p:5037},
+{s:"JDJUNC_VER",n:"JOCKEY DEPORTIVO JUNCAL VERDE",p:10079},
+{s:"JFPDEN_GR",n:"JOCKEY DEPORTIVO ENCO NEGRO",p:11087},
+{s:"JFPDEN_VR",n:"JOCKEY FIVE PANEL ENCO VERDE",p:11087},
+{s:"JFPPUE_AZ",n:"JOCKEY FIVE PANEL PUELO AZUL",p:10079},
+{s:"JFPPUE_CAF",n:"JOCKEY FIVE PANEL PUELO CAFÉ/VERDE",p:10079},
+{s:"JFPREVAZ",n:"JOCKEY REVERSIBLE ESPOLÓN AZUL",p:11087},
+{s:"JTRUCAU_CC",n:"JOCKEY TRUCKER CAUTÍN CAFÉ",p:9575},
+{s:"JTRUCAU_NG",n:"JOCKEY TRUCKER CAUTÍN NEGRO",p:9575},
+{s:"SOMLIRGRI_SM",n:"SOMBRERO LIRCAY GRIS S/M",p:13104},
+{s:"SOMLIRVR_SM",n:"SOMBRERO LIRCAY VERDE S/M",p:13104},
+{s:"CINTRALM_BE",n:"CINTILLO LANA MERINO TRANCURA BEIGE",p:11087},
+{s:"GBEACHO_CG",n:"GORRO BEANIE CHOAPA GRIS",p:7558},
+{s:"GBEACHO_NG",n:"GORRO BEANIE CHOAPA NEGRO",p:7558},
+{s:"GBEACHO_VR",n:"GORRO BEANIE CHOAPA VERDE",p:7558},
+{s:"GBEALIM_AM",n:"GORRO BEANIE LIMARÍ AMBAR",p:7558},
+{s:"GBEALIM_GR",n:"GORRO BEANIE LIMARÍ GRIS",p:7558},
+{s:"GBEATRALM_BE",n:"GORRO BEANIE LANA MERINO TRANCURA BEIGE",p:11087},
+{s:"CCOOLAZ_SM",n:"CALCETÍN DEPORTIVO COOLMAX CORCOVADO GRIS S/M",p:6550},
+{s:"CCOOLAZ_LXL",n:"CALCETÍN DEPORTIVO COOLMAX CORCOVADO GRIS L/XL",p:6550},
+{s:"GPCLMNGR_SM",n:"GUANTE PRIMERA CAPA LANA MERINO SERRANO NEGRO S/M",p:12600},
+{s:"GPCNGR_SM",n:"GUANTE PRIMERA CAPA QUECO NEGRO S/M",p:10583},
+{s:"PCTERHNG_S",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS S",p:11087},
+{s:"PCTERHNG_M",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS M",p:11087},
+{s:"PCTERHNG_L",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS L",p:11087},
+{s:"PCTERHNG_XL",n:"PRIMERA CAPA ULTRALIGERA HOMBRE TERMICA GRIS XL",p:11087},
+{s:"PCULHNG_S",n:"PRIMERA CAPA TÉRMICA HOMBRE VENTOFIT NEGRO S",p:18650},
+{s:"PCULHNG_XL",n:"PRIMERA CAPA TÉRMICA HOMBRE VENTOFIT NEGRO XL",p:18650},
+{s:"PMCCPBL_S",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO S",p:10079},
+{s:"PMCCPBL_M",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO M",p:10079},
+{s:"PMCCPBL_L",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO L",p:10079},
+{s:"PMCCPBL_XL",n:"POLERA MC HOMBRE CUERNOS DEL PAINE BLANCO XL",p:10079},
+{s:"PMCEQBR_S",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO S",p:9575},
+{s:"PMCEQBR_M",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO M",p:9575},
+{s:"PMCEQBR_L",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO L",p:9575},
+{s:"PMCEQBR_XL",n:"POLERA MC HOMBRE EQUIPAMIENTO BURDEO XL",p:9575},
+{s:"PMCMOBL_S",n:"POLERA MC HOMBRE MOCHILERA BLANCO S",p:9575},
+{s:"PMCMOBL_M",n:"POLERA MC HOMBRE MOCHILERA BLANCO M",p:9575},
+{s:"PMCMOBL_XL",n:"POLERA MC HOMBRE MOCHILERA BLANCO XL",p:9575},
+{s:"PODEHDIAZ_S",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL S",p:11087},
+{s:"PODEHDIAZ_M",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL M",p:11087},
+{s:"PODEHDIAZ_L",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL L",p:11087},
+{s:"PODEHDIAZ_XL",n:"POLERA DRY CORE HOMBRE DINÁMICA AZUL XL",p:11087},
+{s:"PODEHDIGC_S",n:"POLERA DRY CORE HOMBRE DINÁMICA GRIS S",p:11087},
+{s:"PODEHDIGC_M",n:"POLERA DRY CORE HOMBRE DINÁMICA GRIS M",p:11087},
+{s:"PODEHDIGC_L",n:"POLERA DRY CORE HOMBRE DINÁMICA GRIS L",p:11087},
+{s:"CAMCHHOVR_S",n:"CAMISA MC HOMBRE HORIZONTE VERDE S",p:20163},
+{s:"CAMCHHOVR_M",n:"CAMISA MC HOMBRE HORIZONTE VERDE M",p:20163},
+{s:"CAMCHHOVR_L",n:"CAMISA MC HOMBRE HORIZONTE VERDE L",p:20163},
+{s:"CAMCHHOAZ_S",n:"CAMISA MC HOMBRE HORIZONTE AZUL S",p:20163},
+{s:"CAMCHHOAZ_M",n:"CAMISA MC HOMBRE HORIZONTE AZUL M",p:20163},
+{s:"CAMCHHOAZ_L",n:"CAMISA MC HOMBRE HORIZONTE AZUL L",p:20163},
+{s:"PODEMDICE_XS",n:"POLERA DRY CORE MUJER DINÁMICA CELESTE XS",p:11087},
+{s:"PODEMDICE_S",n:"POLERA DRY CORE MUJER DINÁMICA CELESTE S",p:11087},
+{s:"PODEMDICE_M",n:"POLERA DRY CORE MUJER DINÁMICA CELESTE M",p:11087},
+{s:"PODEMDIGR_XS",n:"POLERA DRY CORE MUJER DINÁMICA GRIS XS",p:11087},
+{s:"PODEMDIGR_S",n:"POLERA DRY CORE MUJER DINÁMICA GRIS S",p:11087},
+{s:"PEDPAZ_XS",n:"PETO DEPORTIVO MUJER AURA FITFLEX AZUL XS",p:11592},
+{s:"PEDPAZ_S",n:"PETO DEPORTIVO MUJER AURA FITFLEX AZUL S",p:11592},
+{s:"PEDPNG_XS",n:"PETO DEPORTIVO MUJER AURA FITFLEX NEGRO XS",p:11592},
+{s:"PEDPNG_S",n:"PETO DEPORTIVO MUJER AURA FITFLEX NEGRO S",p:11592},
+{s:"PCOVENHNG_S",n:"POLAR CORTAVIENTO VENT-OFF HOMBRE PATAGÓN NEGRO S",p:32768},
+{s:"PCOVENHNG_M",n:"POLAR CORTAVIENTO VENT-OFF HOMBRE PATAGÓN NEGRO M",p:32768},
+{s:"PTEXHCAFZ_S",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO CAFÉ S",p:22684},
+{s:"PTEXHCAFZ_M",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO CAFÉ M",p:22684},
+{s:"PTEXHCAFZ_L",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO CAFÉ L",p:22684},
+{s:"PTEXHGRFZ_S",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO GRIS S",p:22684},
+{s:"PTEXHGRFZ_M",n:"POLAR TEXTURADO FULL ZIP HOMBRE VENTISQUERO GRIS M",p:22684},
+{s:"PTEXHGR_S",n:"POLAR TEXTURADO HOMBRE VENTISQUERO GRIS S",p:20163},
+{s:"PTEXHVR_S",n:"POLAR TEXTURADO HOMBRE VENTISQUERO VERDE S",p:20163},
+{s:"PTEXMBEFZ_XS",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO BEIGE XS",p:22684},
+{s:"PTEXMBEFZ_S",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO BEIGE S",p:22684},
+{s:"PTEXMBEFZ_M",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO BEIGE M",p:22684},
+{s:"PTEXMGRFZ_XS",n:"POLAR TEXTURADO FULL ZIP MUJER VENTISQUERO GRIS XS",p:22684},
+{s:"PTEXMGR_XS",n:"POLAR TEXTURADO MUJER VENTISQUERO GRIS XS",p:20163},
+{s:"PTEXMRO_XS",n:"POLAR TEXTURADO MUJER VENTISQUERO BURDEO XS",p:20163},
+{s:"CHIMHFRNG_S",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO S",p:40331},
+{s:"CHIMHFRNG_M",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO M",p:40331},
+{s:"CHIMHFRNG_L",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO L",p:40331},
+{s:"CHIMHFRNG_XL",n:"IMPERMEABLE HOMBRE FRONTERA NEGRO XL",p:40331},
+{s:"PATEHAM_L",n:"PARKA TERMICA HOMBRE INDÓMITA AMARILLO L",p:45373},
+{s:"PATEHNONG_S",n:"PARKA TERMICA HOMBRE NÓMADA NEGRO S",p:40331},
+{s:"PATEHNONG_M",n:"PARKA TERMICA HOMBRE NÓMADA NEGRO M",p:40331},
+{s:"CHIMMFRNG_XS",n:"IMPERMEABLE MUJER FRONTERA NEGRO XS",p:40331},
+{s:"CHIMMFRNG_S",n:"IMPERMEABLE MUJER FRONTERA NEGRO S",p:40331},
+{s:"CHIMMFRNG_M",n:"IMPERMEABLE MUJER FRONTERA NEGRO M",p:40331},
+{s:"PATEMNONG_S",n:"PARKA TERMICA MUJER NÓMADA NEGRO S",p:40331},
+{s:"PATEMNONG_M",n:"PARKA TERMICA MUJER NÓMADA NEGRO M",p:40331},
+{s:"PADEHTRGR_30",n:"PANTALON DESMONTABLE HOMBRE TRAVESÍA GRIS 30",p:28734},
+{s:"PADEHTRGR_32",n:"PANTALON DESMONTABLE HOMBRE TRAVESÍA GRIS 32",p:28734},
+{s:"PADEHTRGR_34",n:"PANTALON DESMONTABLE HOMBRE TRAVESÍA GRIS 34",p:28734},
+{s:"PADEMTRGR_34",n:"PANTALON DESMONTABLE MUJER TRAVESÍA GRIS 34",p:28734},
+{s:"PADEMTRGR_36",n:"PANTALON DESMONTABLE MUJER TRAVESÍA GRIS 36",p:28734},
+{s:"SDHTFNG_S",n:"SHORT DEPORTIVO HOMBRE TRAILFIT NEGRO S",p:15121},
+{s:"SDHTFNG_M",n:"SHORT DEPORTIVO HOMBRE TRAILFIT NEGRO M",p:14617},
+{s:"SDHTFNG_L",n:"SHORT DEPORTIVO HOMBRE TRAILFIT NEGRO L",p:14617},
+{s:"CABING_XS",n:"CALZA BIKER MUJER HALO FLIXFLEX NEGRO XS",p:11592},
+{s:"CABIAZ_XS",n:"CALZA BIKER MUJER HALO FLIXFLEX AZUL XS",p:11592},
+{s:"CADEMVR_XS",n:"CALZA DEPORTIVA MUJER PANORAMICA VERDE XS",p:15121},
+{s:"VTNGCN_530",n:"VASO TÉRMICO 530ML NEGRO CARPINTERO",p:9575},
+{s:"VTAZQU_530",n:"VASO TÉRMICO 530ML AZUL QUILLAY",p:9575},
+{s:"VTAZTOLA_350",n:"VASO TÉRMICO 350ML AZUL TORTUGA LAÚD",p:8062},
+{s:"VTNGAR_350",n:"VASO TÉRMICO 350ML NEGRO ARAUCARIA",p:8062},
+{s:"BTBLATK_690",n:"BOTELLA TÉRMICA 690ML BLANCO ATAKAMA",p:8566},
+{s:"BTNGATK_690",n:"BOTELLA TÉRMICA 690ML NEGRO ATAKAMA",p:8566},
+{s:"BTNGAM_690",n:"BOTELLA TÉRMICA 690ML NEGRO AMANITA MUSCARIA",p:10079},
+{s:"BTAZBJ_690",n:"BOTELLA TÉRMICA 690ML AZUL BALLENA JOROBADA",p:10079},
+{s:"BTAZMP_960",n:"BOTELLA TÉRMICA 960ML AZUL MARTÍN PESCADOR",p:14113},
+{s:"BTNGPU_960",n:"BOTELLA TÉRMICA 960ML NEGRO PUMA",p:14113},
+{s:"PETNG_150",n:"PETACA 150ML NEGRO PUMA",p:8566},
+{s:"SETCAFNG_350",n:"SET CAFETERA + 2 VASOS NEGRO CÓNDOR ANDINO",p:30247},
+{s:"TENGAR_1.3L",n:"TERMO 1.3LT NEGRO ARAUCARIA",p:18650},
+{s:"SVANGFA_480",n:"SET 4 VASOS ACERO 480ML FAUNA CHILENA",p:17642},
+{s:"SVNGAV_480",n:"SET 4 VASOS ACERO 480ML AVES CHILENAS",p:17642},
+{s:"SETST_AVES",n:"SET DE STICKERS AVES",p:1513},
+{s:"SETST_FAUNA",n:"SET DE STICKERS FAUNA",p:1513},
+{s:"SETST_FF",n:"SET DE STICKERS FLORA Y FUNGI",p:1513},
+{s:"PFUTAZMN_3637",n:"PANTUFLA FUTALEUFÚ FLEX AZUL MARINO 36-37",p:13608},
+{s:"PFUTAZMN_3839",n:"PANTUFLA FUTALEUFÚ FLEX AZUL MARINO 38-39",p:13608},
+{s:"PFUTAZMN_4041",n:"PANTUFLA FUTALEUFÚ FLEX AZUL MARINO 40-41",p:13608},
+{s:"PFUTBEFPN_3637",n:"PANTUFLA FUTALEUFÚ FLEX BEIGE FLORES 36-37",p:13608},
+{s:"PFUTBEFPN_3839",n:"PANTUFLA FUTALEUFÚ FLEX BEIGE FLORES 38-39",p:13608},
+{s:"PFUTBURN_3637",n:"PANTUFLA FUTALEUFÚ FLEX BURDEO 36-37",p:13608},
+{s:"PFUTCAFN_3637",n:"PANTUFLA FUTALEUFÚ FLEX CAFÉ 36-37",p:13608},
+{s:"PFUTCAFN_3839",n:"PANTUFLA FUTALEUFÚ FLEX CAFÉ 38-39",p:13608},
+{s:"PFUTCELN_3637",n:"PANTUFLA FUTALEUFÚ FLEX AZUL PETRÓLEO 36-37",p:13608},
+{s:"PFUTNGRCN_3637",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 36-37",p:13608},
+{s:"PFUTNGRCN_3839",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 38-39",p:13608},
+{s:"PFUTNGRCN_4041",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 40-41",p:13608},
+{s:"PFUTNGRCN_4243",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/CAFÉ 42-43",p:13608},
+{s:"PFUTNGRN_3637",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 36-37",p:13608},
+{s:"PFUTNGRN_3839",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 38-39",p:13608},
+{s:"PFUTNGRN_4041",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 40-41",p:13608},
+{s:"PFUTNGRN_4243",n:"PANTUFLA FUTALEUFÚ FLEX NEGRO/GRIS 42-43",p:13608},
+{s:"PFUTVRMN_3637",n:"PANTUFLA FUTALEUFÚ FLEX VERDE MUSGO 36-37",p:13608},
+{s:"PFUTVRMN_3839",n:"PANTUFLA FUTALEUFÚ FLEX VERDE MUSGO 38-39",p:13608},
+{s:"PNAVAZMN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX AZUL MARINO 36-37",p:17642},
+{s:"PNAVAZMN_3839",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX AZUL MARINO 38-39",p:17642},
+{s:"PNAVBEFPN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX BEIGE FLORES 36-37",p:17642},
+{s:"PNAVBURN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX BURDEO 36-37",p:17642},
+{s:"PNAVCAFN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX CAFÉ 36-37",p:17642},
+{s:"PNAVNGRN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX NEGRO/GRIS 36-37",p:17642},
+{s:"PNAVNGRN_3839",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX NEGRO/GRIS 38-39",p:17642},
+{s:"PNAVNGRN_4041",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX NEGRO/GRIS 40-41",p:17642},
+{s:"PNAVVRMN_3637",n:"PANTUFLA CAÑA ALTA NAVARINO FLEX VERDE MUSGO 36-37",p:17642},
+{s:"PTORNGR_3637",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 36-37",p:11087},
+{s:"PTORNGR_3839",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 38-39",p:11087},
+{s:"PTORNGR_4041",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 40-41",p:11087},
+{s:"PTORNGR_4243",n:"PANTUFLA SIN TALÓN TORTEL FLEX NEGRO 42-43",p:11087},
+{s:"PCOCNGRN_3637",n:"PANTUFLA COCHRANE FLEX NEGRO 36-37",p:13608},
+{s:"PCOCNGRN_3839",n:"PANTUFLA COCHRANE FLEX NEGRO 38-39",p:13608},
+{s:"PCOCNGRN_4041",n:"PANTUFLA COCHRANE FLEX NEGRO 40-41",p:13608},
+{s:"PAYSNGR_3637",n:"PANTUFLA AYSÉN NEGRO 36-37",p:16634},
+{s:"PAYSNGR_3839",n:"PANTUFLA AYSÉN NEGRO 38-39",p:16634},
+{s:"PAYSNGR_4041",n:"PANTUFLA AYSÉN NEGRO 40-41",p:16634},
+{s:"PAYSVR_3839",n:"PANTUFLA AYSÉN VERDE 38-39",p:16634},
+{s:"PAYSVR_4041",n:"PANTUFLA AYSÉN VERDE 40-41",p:16634},
+{s:"PNAVAMMS3637",n:"PANTUFLA NAVARINO AMARILLO MOSTAZA 36-37",p:17642},
+{s:"PNAVBEGAP3637",n:"PANTUFLA NAVARINO BEIGE ANIMAL PRINT 36-37",p:17642},
+{s:"PNAVNGR4041",n:"PANTUFLA NAVARINO NEGRO 40-41",p:17642},
+{s:"SCHCAF_40",n:"SANDALIA OUTDOOR CHUNGARÁ CAFÉ 40",p:18650},
+{s:"SCHCAF_41",n:"SANDALIA OUTDOOR CHUNGARÁ CAFÉ 41",p:18650},
+{s:"SCHCAF_42",n:"SANDALIA OUTDOOR CHUNGARÁ CAFÉ 42",p:18650},
+{s:"SCHNG_43",n:"SANDALIA OUTDOOR CHUNGARÁ NEGRO 43",p:18650},
+{s:"SCHVR_41",n:"SANDALIA OUTDOOR CHUNGARÁ VERDE 41",p:18650},
+{s:"BAPROAZ",n:"BANANO PLEGABLE PROVINCIA AZUL 2LT",p:7558},
+{s:"BAPROGG",n:"BANANO PLEGABLE PROVINCIA GRIS 2LT",p:7558},
+{s:"MPOCHAZ_16LT",n:"MOCHILA PLEGABLE POCHOCO CELESTE 16LT",p:10583},
+{s:"MPOCHGG_16LT",n:"MOCHILA PLEGABLE POCHOCO NEGRO 16LT",p:10583},
+{s:"MCOCHNGR_25LT",n:"MOCHILA COCHAMO NEGRO 25LT",p:32768},
+{s:"MPSMANQNG_28LT",n:"MOCHILA PLEGABLE SECA MANQUEHUE NEGRO 28LT",p:25205},
+{s:"MVSNNG_40LT",n:"MOCHILA DE VIAJE SIERRA NEVADA NEGRO 40LT",p:35289},
+{s:"BRT7NG_55LT",n:"BOLSO DUFFLE RUTA 7 NEGRO 55LT",p:30247},
+{s:"BRT7NG_80LT",n:"BOLSO DUFFLE RUTA 7 NEGRO 80LT",p:35289},
+{s:"MPBBLEOCEL",n:"MOCHILA PORTABEBÉ LEONERA CELESTE",p:110919},
+{s:"CMMEAM_SM",n:"CUBRE MOCHILAS MELIMOYU NARANJA S/M",p:5037},
+{s:"CMMEAM_ML",n:"CUBRE MOCHILAS MELIMOYU NARANJA M/L",p:5541},
+{s:"SPCLASGRBG",n:"SILLA PLEGABLE CAMPING LASCAR GRIS/BEIGE",p:18650},
+{s:"SPCLASGRNJ",n:"SILLA PLEGABLE CAMPING LASCAR GRIS/NARANJO",p:18650},
+{s:"SCLLAGRAZ_XL",n:"SILLA DE CAMPING LLAIMA GRIS/AZUL XL",p:21676},
+{s:"SCLLAGRNJ_XL",n:"SILLA DE CAMPING LLAIMA GRIS/NARANJO XL",p:21676},
+{s:"SCNICH_GRAMA",n:"SILLA CAMPING NIÑOS CHAITÉN GRIS/AMARILLO",p:11087},
+{s:"HDSA_CEL",n:"HAMACA DOBLE SAUCE CELESTE 2P",p:18146},
+{s:"HSCOI_AMA",n:"HAMACA SINGLE COIHUE AMARILLO 1P",p:14113},
+{s:"CTOTVRGR_4P",n:"CARPA TOTORALILLO VERDE/GRIS 4P",p:75625},
+{s:"CTOTVRGR_8P",n:"CARPA TOTORALILLO VERDE/GRIS 8P",p:151255},
+{s:"COHULI1P_VR",n:"COLCHONETA INFLABLE HUERQUEHUE VERDE 1P",p:35289},
+{s:"CALCAM_NAR",n:"COLCHONETA AISLANTE LA CAMPANA GRIS 1P",p:20163},
+{s:"MCPCALBL_180",n:"MESA PLEGABLE CAMPING CALBUCO BLANCO 180CM",p:25205},
+{s:"TEPLCAL_VR",n:"TETERA PLEGABLE CALAFATE VERDE 1LT",p:11592},
+{s:"SETBLAV_VR",n:"SET 2 BOWLS + CUBIERTOS AVELLANA VERDE",p:13608},
+{s:"OPMQVR_2.5LT",n:"OLLA PLEGABLE MAQUI VERDE 2.5LT",p:21676},
+{s:"CRCPNG_1LT",n:"COCINILLA RÁPIDA CUERNOS DEL PAINE NEGRO 1LT",p:35289},
+{s:"LFALNG_195",n:"LINTERNA FRONTAL ALMA AZUL/NEGRO 195LUM",p:10079},
+{s:"LFPAVR_380",n:"LINTERNA FRONTAL PARANAL VERDE 380LUM",p:15121},
+{s:"FOUTOL_470",n:"FOCO OUTDOOR LED TOLOLO 470LUM",p:21676},
+{s:"FOUTOL_1600",n:"FOCO OUTDOOR LED TOLOLO 1600LUM",p:25205},
+{s:"LILEDCRSUR",n:"LINTERNA LED LINE BLANCO 300LUM",p:11592},
+{s:"TELQAZ_M",n:"TOALLA MICROFIBRA ELQUI AZUL M",p:4029},
+{s:"TELQGR_M",n:"TOALLA MICROFIBRA ELQUI GRIS M",p:4029},
+{s:"TELQVR_M",n:"TOALLA MICROFIBRA ELQUI VERDE M",p:4029},
+{s:"TELQAZ_XL",n:"TOALLA MICROFIBRA ELQUI AZUL XL",p:7558},
+{s:"TELQGR_XL",n:"TOALLA MICROFIBRA ELQUI GRIS XL",p:7558},
+{s:"TMAUAM_XL",n:"TOALLA MICROFIBRA ULTRA LIGERA MAULLIN AZUL MARINO XL",p:8062},
+{s:"TMAUGC_XL",n:"TOALLA MICROFIBRA ULTRA LIGERA MAULLIN GRIS XL",p:8062},
+{s:"MTNALVR_L",n:"MANTA TÉRMICA NALCA VERDE L",p:25205},
+{s:"BCPTOL_GRREC",n:"BASURERO CAMPING PLEGABLE TOLTÉN GRIS RECICLAJE",p:9575},
+{s:"dispatch_cost_lp",n:"Despacho a domicilio",p:15000},
+{s:"Personalizacion",n:"Estampado / Personalización",p:3000}
+];
+
+let items=[];
+
+function fmt(n){return '$'+Math.round(n).toLocaleString('es-CL');}
+function updateLbl(){document.getElementById('cotLabel').textContent='Cotización N° '+(document.getElementById('cotNum').value||'—');}
+function showMsg(txt,type){const m=document.getElementById('smsg');m.textContent=txt;m.className='smsg '+(type==='ok'?'sok':'serr');}
+
+async function getNextCotNumber(){
+  try{
+    const res=await fetch(SHEETS_URL+'?action=lastNumber');
+    const data=await res.json();
+    if(data.status==='OK') return parseInt(data.last)+1;
+  }catch(e){}
+  return 461;
+}
+
+// Buscador
+document.getElementById('searchInput').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  const dd=document.getElementById('dd');
+  const body=document.getElementById('ddBody');
+  if(!q){dd.style.display='none';return;}
+  const res=P.filter(p=>p.s.toLowerCase().includes(q)||p.n.toLowerCase().includes(q)).slice(0,12);
+  if(!res.length){dd.style.display='none';return;}
+  body.innerHTML=res.map(p=>`<div class="dd-row" onmousedown="addItem('${p.s}')"><span class="dd-sku">${p.s}</span><span class="dd-name">${p.n}</span><span class="dd-price">${fmt(p.p)}</span></div>`).join('');
+  dd.style.display='block';
+});
+document.getElementById('searchInput').addEventListener('blur',function(){
+  setTimeout(()=>{document.getElementById('dd').style.display='none';},150);
+});
+
+// Carga masiva
+document.getElementById('fileInput').addEventListener('change',function(){
+  if(!this.files.length)return;
+  const file=this.files[0];
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(rows.length<2){showMsg('El archivo está vacío.','err');return;}
+      const headers=rows[0].map(h=>String(h).toLowerCase().trim());
+      const iSku=headers.findIndex(h=>h.includes('sku')||h.includes('código')||h.includes('codigo'));
+      const iQty=headers.findIndex(h=>h.includes('cantidad')||h.includes('qty')||h.includes('cant'));
+      const iPrc=headers.findIndex(h=>h.includes('precio')||h.includes('price')||h.includes('neto'));
+      if(iSku<0){showMsg('No se encontró columna SKU en el archivo.','err');return;}
+      let added=0,notFound=[];
+      rows.slice(1).forEach(row=>{
+        const sku=String(row[iSku]||'').trim();
+        if(!sku)return;
+        const qty=Math.max(1,parseInt(row[iQty])||1);
+        const prc=iPrc>=0?parseInt(row[iPrc])||null:null;
+        const prod=P.find(p=>p.s.toLowerCase()===sku.toLowerCase());
+        const ex=items.find(i=>i.s.toLowerCase()===sku.toLowerCase());
+        if(prod){
+          if(ex){ex.q+=qty;if(prc)ex.p=prc;}
+          else items.push({s:prod.s,n:prod.n,p:prc||prod.p,q:qty});
+        }else{
+          if(ex){ex.q+=qty;if(prc)ex.p=prc;}
+          else{items.push({s:sku,n:sku,p:prc||0,q:qty});notFound.push(sku);}
+        }
+        added++;
+      });
+      renderTable();recalc();
+      document.getElementById('fileInput').value='';
+      let msg=added+' producto(s) cargado(s).';
+      if(notFound.length) msg+=' SKUs no encontrados en maestro: '+notFound.join(', ');
+      showMsg(msg,notFound.length?'err':'ok');
+    }catch(err){showMsg('Error al leer el archivo: '+err.message,'err');}
+  };
+  reader.readAsBinaryString(file);
+});
+
+function addItem(sku){
+  const p=P.find(x=>x.s===sku);
+  if(!p)return;
+  const ex=items.find(i=>i.s===sku);
+  if(ex)ex.q++;else items.push({s:p.s,n:p.n,p:p.p,q:1});
+  document.getElementById('searchInput').value='';
+  document.getElementById('dd').style.display='none';
+  renderTable();recalc();
+}
+
+function renderTable(){
+  const empty=document.getElementById('emptyState');
+  const tbl=document.getElementById('tbl');
+  if(!items.length){empty.style.display='block';tbl.style.display='none';return;}
+  empty.style.display='none';tbl.style.display='table';
+  document.getElementById('tblBody').innerHTML=items.map((it,i)=>`
+    <tr>
+      <td style="font-size:11px;color:#999;font-family:monospace">${it.s}</td>
+      <td>${it.n}</td>
+      <td class="tc"><input type="number" class="qinput" min="1" value="${it.q}" oninput="upQty(${i},this.value)"></td>
+      <td class="tr"><input type="number" class="qinput" style="width:90px;text-align:right" min="0" value="${it.p}" oninput="upPrice(${i},this.value)"></td>
+      <td class="tr">${fmt(it.p*it.q)}</td>
+      <td class="tc"><button class="bdel" onclick="delItem(${i})">✕</button></td>
+    </tr>`).join('');
+}
+
+function upQty(i,v){items[i].q=Math.max(1,parseInt(v)||1);renderTable();recalc();}
+function upPrice(i,v){items[i].p=Math.max(0,parseInt(v)||0);recalc();}
+function delItem(i){items.splice(i,1);renderTable();recalc();}
+
+function recalc(){
+  const disc=parseFloat(document.getElementById('discount').value)||0;
+  const sub=items.reduce((s,it)=>s+it.p*it.q,0);
+  const da=sub*(disc/100);
+  const net=sub-da;
+  const iva=net*0.19;
+  document.getElementById('tSub').textContent=fmt(sub);
+  document.getElementById('tDiscLbl').textContent='Descuento ('+disc+'%)';
+  document.getElementById('tDisc').textContent=disc>0?'-'+fmt(da):'-$0';
+  document.getElementById('tNet').textContent=fmt(net);
+  document.getElementById('tIva').textContent=fmt(iva);
+  document.getElementById('tTotal').textContent=fmt(net+iva);
+}
+
+async function clearAll(){
+  if(items.length&&!confirm('¿Limpiar cotización?'))return;
+  items=[];
+  ['empresa','rut','contacto'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('discount').value=0;
+  window.history.replaceState({},'',window.location.pathname);
+  const next=await getNextCotNumber();
+  document.getElementById('cotNum').value=next;
+  updateLbl();renderTable();recalc();
+  const m=document.getElementById('smsg');m.className='smsg';m.textContent='';
+}
+
+function exportExcel(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  const rows=[['SKU','Cantidad','Precio Neto']];
+  items.forEach(it=>rows.push([it.s,it.q,it.p]));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:20},{wch:12},{wch:14}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Orden');
+  XLSX.writeFile(wb,'Orden_Atakama_'+document.getElementById('cotNum').value+'.xlsx');
+  showMsg('Excel descargado correctamente.','ok');
+}
+
+function saveSheets(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  const disc=parseFloat(document.getElementById('discount').value)||0;
+  const sub=items.reduce((s,it)=>s+it.p*it.q,0);
+  const net=sub*(1-disc/100);
+  const total=Math.round(net*1.19);
+  const cotN=document.getElementById('cotNum').value;
+  const penUrl='https://codepen.io/Ignacio-Aguilera-the-sans/pen/YPGrZWM?cot='+cotN;
+  window.history.replaceState({},'','?cot='+cotN);
+  const row={cotizacion:cotN,fecha:document.getElementById('fecha').value||new Date().toLocaleDateString('es-CL'),empresa:document.getElementById('empresa').value||'—',rut:document.getElementById('rut').value||'—',contacto:document.getElementById('contacto').value||'—',descuento:disc,total:total,link:penUrl};
+  const img=new Image();
+  img.src=SHEETS_URL+'?'+new URLSearchParams(row).toString();
+  setTimeout(()=>showMsg('✓ Guardado. Link: '+penUrl,'ok'),1500);
+}
+
+async function loadFromUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const cot=params.get('cot');
+  if(!cot)return false;
+  const local=localStorage.getItem('cot_'+cot);
+  if(local){
+    try{
+      const data=JSON.parse(local);
+      document.getElementById('cotNum').value=data.cotizacion;
+      document.getElementById('fecha').value=data.fecha;
+      document.getElementById('empresa').value=data.empresa;
+      document.getElementById('rut').value=data.rut||'';
+      document.getElementById('contacto').value=data.contacto||'';
+      document.getElementById('discount').value=data.descuento||0;
+      items=JSON.parse(data.productos||'[]');
+      updateLbl();renderTable();recalc();
+      showMsg('Cotización N° '+cot+' cargada.','ok');
+      return true;
+    }catch(e){}
+  }
+  try{
+    const res=await fetch(SHEETS_URL+'?action=load&cotizacion='+cot);
+    const data=await res.json();
+    if(data.status==='OK'){
+      document.getElementById('cotNum').value=data.cotizacion;
+      document.getElementById('fecha').value=data.fecha;
+      document.getElementById('empresa').value=data.empresa;
+      document.getElementById('rut').value=data.rut||'';
+      document.getElementById('contacto').value=data.contacto||'';
+      document.getElementById('discount').value=data.descuento||0;
+      updateLbl();renderTable();recalc();
+      showMsg('Cotización N° '+cot+' cargada.','ok');
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+async function makePDF(){
+  if(!items.length){showMsg('Agrega al menos un producto.','err');return;}
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'letter'});
+    const W=215.9,M=18;
+    const logoImg=new Image();
+    logoImg.crossOrigin='anonymous';
+    logoImg.src='https://i.imgur.com/26BHPj5.png';
+    await new Promise(r=>{logoImg.onload=r;logoImg.onerror=r;});
+    if(logoImg.complete&&logoImg.naturalWidth>0){
+      const c=document.createElement('canvas');
+      c.width=logoImg.naturalWidth;c.height=logoImg.naturalHeight;
+      c.getContext('2d').drawImage(logoImg,0,0);
+      doc.addImage(c.toDataURL('image/png'),'PNG',M,8,65,16);
+    }
+    doc.setDrawColor(200,200,200);doc.setLineWidth(0.3);
+    doc.line(M,28,W-M,28);
+    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(26,26,26);
+    const cotN=document.getElementById('cotNum').value||'—';
+    doc.text('COTIZACIÓN N° '+cotN,W/2,38,{align:'center'});
+    doc.line(M,42,W-M,42);
+    const fecha=document.getElementById('fecha').value||new Date().toLocaleDateString('es-CL');
+    [['Fecha',fecha],['Empresa',document.getElementById('empresa').value||'—'],['RUT',document.getElementById('rut').value||'—'],['Contacto',document.getElementById('contacto').value||'—']].forEach((f,i)=>{
+      const y=50+i*7;
+      doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text(f[0],M,y);
+      doc.setTextColor(26,26,26);doc.text(f[1],56,y);
+    });
+    doc.line(M,80,W-M,80);
+    const disc=parseFloat(document.getElementById('discount').value)||0;
+    doc.autoTable({
+      startY:84,
+      head:[['Código','Descripción','Cantidad','Precio Neto desc.','Total Neto']],
+      body:items.map(it=>[it.s,it.n.length>46?it.n.substring(0,44)+'…':it.n,String(it.q),fmt(it.p),fmt(it.p*it.q)]),
+      margin:{left:M,right:M},
+      styles:{fontSize:8,cellPadding:2.5,textColor:[26,26,26]},
+      headStyles:{fillColor:[26,26,26],textColor:[255,255,255],fontStyle:'bold',fontSize:8},
+      columnStyles:{0:{cellWidth:28},1:{cellWidth:76},2:{cellWidth:20,halign:'center'},3:{cellWidth:34,halign:'right'},4:{cellWidth:30,halign:'right'}},
+      alternateRowStyles:{fillColor:[249,249,249]}
+    });
+    const fy=doc.lastAutoTable.finalY+8;
+    const sub=items.reduce((s,it)=>s+it.p*it.q,0);
+    const da=sub*(disc/100);
+    const net=sub-da;
+    const iva=net*0.19;
+    const tx=W-M;
+    const rows=disc>0?[['Subtotal neto',fmt(sub)],['Descuento ('+disc+'%)','-'+fmt(da)],['Valor neto',fmt(net)],['IVA 19%',fmt(iva)]]:[['Valor neto',fmt(net)],['IVA 19%',fmt(iva)]];
+    rows.forEach((r,i)=>{
+      const y=fy+i*7;
+      doc.setFontSize(9);doc.setFont('helvetica','normal');
+      doc.setTextColor(100,100,100);doc.text(r[0],tx-55,y);
+      if(r[0].startsWith('Desc'))doc.setTextColor(163,45,45);else doc.setTextColor(26,26,26);
+      doc.text(r[1],tx,y,{align:'right'});
+    });
+    const ly=fy+rows.length*7;
+    doc.setDrawColor(200,200,200);doc.line(tx-58,ly-2,tx,ly-2);
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(26,26,26);
+    doc.text('Total',tx-55,ly+4);doc.text(fmt(net+iva),tx,ly+4,{align:'right'});
+    const footY=Math.max(ly+18,230);
+    doc.setLineWidth(0.3);doc.line(M,footY,W-M,footY);
+    doc.setFontSize(8);doc.setFont('helvetica','normal');
+    [['Razón Social','ATAKAMA OUTDOOR SPA'],['RUT','76.475.772-6'],['Dirección','Tabancura 1482, Vitacura'],['Teléfono','56 9 9073 2022'],['Mail','hola@atakamaoutdoor.cl'],['Página Web','www.atakamaoutdoor.cl'],['Banco','Banco de Chile'],['Cuenta Corriente','8001210508']].forEach((r,i)=>{
+      const y=footY+6+i*5;
+      doc.setTextColor(110,110,110);doc.text(r[0],M,y);
+      doc.setTextColor(26,26,26);doc.text(r[1],56,y);
+    });
+    doc.save('Cotizacion_Atakama_'+cotN+'.pdf');
+    showMsg('PDF descargado correctamente.','ok');
+  }catch(e){showMsg('Error: '+e.message,'err');}
+}
+
+document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
+(async()=>{
+  const loaded=await loadFromUrl();
+  if(!loaded){
+    const next=await getNextCotNumber();
+    document.getElementById('cotNum').value=next;
+    updateLbl();
+  }
+  recalc();
+})();
+</script>
+</body>
+</html>
