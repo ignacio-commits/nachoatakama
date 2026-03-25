@@ -660,6 +660,8 @@ async function makePDF(){
 
 document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
 (async()=>{
+  // Cargar productos desde Sheets automáticamente al iniciar
+  await refreshProducts();
   const loaded=await loadFromUrl();
   if(!loaded){
     const next=await getNextCotNumber();
