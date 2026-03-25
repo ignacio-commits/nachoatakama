@@ -95,6 +95,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
       <label>Carga masiva:</label>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
       <button class="btn" onclick="document.getElementById('fileInput').click()">📂 Cargar Excel</button>
+      <button class="btn" id="btnRefresh" onclick="refreshProducts()">🔄 Actualizar productos</button>
       <span>Columnas requeridas: SKU | Cantidad | Precio Neto</span>
     </div>
   </div>
@@ -140,7 +141,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
 </div>
 
 <script>
-const SHEETS_URL='https://script.google.com/macros/s/AKfycbwooW0heR5tHuksUMK4fJgBnds4lDUO5f5Cki-ZWQ2FRUg_Wb5fuoxtDfVdde_CCelk/exec';
+const SHEETS_URL='https://script.google.com/macros/s/AKfycby6TJITHU6yI9D4bQRZfNTu_ptn-BdsTBfEZDvprdRgAT54Gd8Tqbxw9-E7IpLSMyww/exec';
 
 const P=[
 {s:"BANLOALM_GR",n:"BANDANA LANA MERINO LOA GRIS",p:12600},
@@ -376,7 +377,27 @@ async function getNextCotNumber(){
   return 461;
 }
 
-// Buscador
+let P_dynamic=[...P]; // copia editable del maestro
+
+async function refreshProducts(){
+  const btn=document.getElementById('btnRefresh');
+  btn.textContent='⏳ Actualizando...';
+  btn.disabled=true;
+  try{
+    const res=await fetch(SHEETS_URL+'?action=getProducts');
+    const data=await res.json();
+    if(data.status==='OK'&&data.products.length>0){
+      P_dynamic=data.products;
+      showMsg('✓ '+P_dynamic.length+' productos actualizados desde Google Sheets.','ok');
+    }else{
+      showMsg('No se encontraron productos en la hoja "Productos".','err');
+    }
+  }catch(e){
+    showMsg('Error al actualizar productos: '+e.message,'err');
+  }
+  btn.textContent='🔄 Actualizar productos';
+  btn.disabled=false;
+}
 document.getElementById('searchInput').addEventListener('input',function(){
   const q=this.value.toLowerCase().trim();
   const dd=document.getElementById('dd');
@@ -435,7 +456,7 @@ document.getElementById('fileInput').addEventListener('change',function(){
 });
 
 function addItem(sku){
-  const p=P.find(x=>x.s===sku);
+  const p=P_dynamic.find(x=>x.s===sku)||P.find(x=>x.s===sku);
   if(!p)return;
   const ex=items.find(i=>i.s===sku);
   if(ex)ex.q++;else items.push({s:p.s,n:p.n,p:p.p,q:1});
