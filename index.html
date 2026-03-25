@@ -141,7 +141,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-alig
 </div>
 
 <script>
-const SHEETS_URL='https://script.google.com/macros/s/AKfycby6TJITHU6yI9D4bQRZfNTu_ptn-BdsTBfEZDvprdRgAT54Gd8Tqbxw9-E7IpLSMyww/exec';
+const SHEETS_URL='https://script.google.com/macros/s/AKfycbz0Ro8expiEsKgdRIQUyUVfa2mNetxodp1NwM4QeSIk2_K_4u1vHgJYv1KezfGAIyDH/exec';
 
 const P=[
 {s:"BANLOALM_GR",n:"BANDANA LANA MERINO LOA GRIS",p:12600},
@@ -377,23 +377,34 @@ async function getNextCotNumber(){
   return 461;
 }
 
-let P_dynamic=[...P]; // copia editable del maestro
+let P_dynamic=[...P];
 
 async function refreshProducts(){
   const btn=document.getElementById('btnRefresh');
   btn.textContent='⏳ Actualizando...';
   btn.disabled=true;
   try{
-    const res=await fetch(SHEETS_URL+'?action=getProducts');
-    const data=await res.json();
-    if(data.status==='OK'&&data.products.length>0){
-      P_dynamic=data.products;
-      showMsg('✓ '+P_dynamic.length+' productos actualizados desde Google Sheets.','ok');
-    }else{
-      showMsg('No se encontraron productos en la hoja "Productos".','err');
-    }
+    await new Promise((resolve,reject)=>{
+      const cbName='_cb_'+Date.now();
+      window[cbName]=function(data){
+        delete window[cbName];
+        document.head.removeChild(script);
+        if(data.status==='OK'&&data.products&&data.products.length>0){
+          P_dynamic=data.products;
+          showMsg('✓ '+P_dynamic.length+' productos actualizados correctamente.','ok');
+        }else{
+          showMsg('No se encontraron productos en la hoja "Productos".','err');
+        }
+        resolve();
+      };
+      const script=document.createElement('script');
+      script.src=SHEETS_URL+'?action=getProducts&callback='+cbName;
+      script.onerror=()=>{reject(new Error('Error de conexión'));};
+      document.head.appendChild(script);
+      setTimeout(()=>reject(new Error('Tiempo de espera agotado')),10000);
+    });
   }catch(e){
-    showMsg('Error al actualizar productos: '+e.message,'err');
+    showMsg('Error al actualizar: '+e.message,'err');
   }
   btn.textContent='🔄 Actualizar productos';
   btn.disabled=false;
